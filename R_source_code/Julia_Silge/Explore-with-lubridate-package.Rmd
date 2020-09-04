@@ -1,0 +1,248 @@
+---
+title: "PRACTICE USING  LUBRIDATE ... THEATREICALLY"
+author: "Nguyen_LSCM"
+date: "8/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<font size = '10'> PRACTICE USING LUBRIDATE... THEATERICALLY </font>
+
+## Read in the London Stage Database
+
+Learn more about the London Stage Databse, including about the data [rpvenance and copde used to build the databse. Briefly, it explroes the theater scene in London from when playhouses were reopened in 1660 after the English civil war to the end of the 18th century.
+
+To start, we are going to download, unzip, and open up the full London Stage Database
+
+**Notes**:
+
+- The chunk below downloads the dataset to the working directory 
+- This is a prettey sizable dataset, so if you run this yourself, be patient while it opens up!
+
+```{r}
+
+library(tidyverse)
+library(tidymodels)
+library(ggthemes)
+
+theme_set(theme_fivethirtyeight())
+
+
+json_path <-  "https://londonstagedatabase.usu.edu/downloads/LondonStageJSON.zip"
+
+download.file(json_path, "LondonStageJSON.zip")
+
+setwd("C:/Users/DellPC/Desktop/R_source_code/Julia_Silge/LondonStageFull")
+
+london_stage_raw <- jsonlite::fromJSON("LondonStageFull.json") %>%
+    as_tibble()
+
+
+```
+
+## Finding the dates
+
+There are thirteen columns in this data. Let's take a moment and look at the column names and content of the first few lines. Which of these columns contains the date information?
+
+
+```{r}
+
+london_stage_raw
+
+```
+
+The ``EventDate`` column contains the data information, but notice that R does not think it's a date 
+
+```{r}
+
+class(london_stage_raw$EventDate)
+
+```
+
+R thinks this is a character (dates encoded like ``'16591029'``), because of the details of the data and the type guessing used by the process of reading in this data. This is not helpful for us, as we need to store this information as date type in order to explore the dates of this London stage data. We will use a function ``ymd()`` from the lubridate package to convert it (There are other similar functions in lubridate, like ``ymd_hms()`` if you have time information, ``mdy()`` if your information is arrangeed differently, etc)
+
+```{r}
+
+library(lubridate)
+
+london_stage <- london_stage_raw %>% 
+               mutate(EventDate = ymd(EventDate))  %>% 
+               filter(!is.na(EventDate))
+
+```
+
+## Getting years and months 
+
+This dataset on the London stage spans more than a century. How can we look at the distribution of stage events over the years? The lubridate package contains functions like ``year()`` that let us get year components of a date 
+
+```{r}
+
+year(today())
+
+```
+
+Let's count up the stage events by year in this dataset
+
+```{r}
+
+london_stage %>% 
+               mutate(EventYear = year(EventDate)) %>% 
+               count(EventYear)
+
+```
+
+
+Looks to me like there are some big differences year-to-year. It would be easier to see this if we made a visualization
+
+```{r}
+
+london_stage %>% 
+               count(EventYear = year(EventDate)) %>% 
+               ggplot(aes(x = EventYear, n)) + 
+               geom_area(fill = 'midnightblue', alpha = 0.8) +
+               labs( y = 'Number of events',
+                     x = NULL)
+
+```
+
+There was a dramatic increase in theater events between about 1710 and 1730. After 1750, the yearly count looks pretty stable.
+
+Do we see month-to-month changes? The lubridate has a function very similar to ``year()`` but instead for finding the month of a date
+
+
+```{r}
+
+london_stage %>% 
+               ggplot(aes( x =month(EventDate))) + 
+               geom_bar(fill = 'midnightblue', alpha = 0.8) +
+               labs( y = 'Number of events')
+
+
+
+```
+
+Wow, that is dramatic! There are dramatically fewer events during the summer months than the rest of the year. We can make this plot easier to read by making a change to how we call the ``month()`` function, with ``label = TRUE``
+
+
+```{r}
+
+london_stage %>% 
+               ggplot(aes(x = month(EventDate, label  = TRUE))) +
+               geom_bar(fill = 'midnightblue', alpha = 0.8) +
+               labs( x= NULL, y = 'Number of events')
+
+
+```
+
+
+When you use ``label = TRUE`` here, the information is being stored as an ordered factor
+
+In this dataset, London playhouses staged the **most** events in Janurary.
+
+What day of week has more events? The lubridate package has a function ``wday()`` package to get the day of the week for any date. This function also has a ``label = TRUE`` argument, like ``month()``
+
+
+```{r}
+
+london_stage %>% 
+               ggplot(aes(x = wday(EventDate, label = TRUE))) +
+               geom_bar(fill = 'midnightblue', alpha = 0.8) + 
+               labs( x = NULL,
+                     y = 'Number of events')
+
+```
+
+
+London theaters did **not** stage events on Sunday or Wednesday. Who knew?
+
+## Time Differences 
+
+One of the most challenging parts of handling dates is finding time intervals, and lubridate can help with that!
+
+Let's look at the individual theaters (tabulated in ``TheaterId``) and see how long individual theaters tend to be in operation
+
+
+```{r}
+
+london_by_theater <- london_stage %>% 
+               filter(TheatreCode != 'none') %>% 
+               group_by(TheatreCode) %>% 
+               summarise(TotalEvents = n(),
+                         MinDate = min(EventDate),
+                         MaxDate = max(EventDate),
+                         TimeSpan = as.duration(MaxDate - MinDate)) %>% 
+               arrange(-TotalEvents)
+
+london_by_theater
+
+```
+
+We have created a new dataframe here, with one row for each theater. The columns tell us
+
+- How many theater events that theatered had
+- The first date that theater had an event
+- The last date that theater had an event
+- The **duration** of the difference between those two 
+
+A duration is a special concept in lubridate of a time difference, but don't get too bogged down in this. How did we calculate this duration? *We only had to subtract the two dates*, and then wrap it in the lubridate function ``as.duration()``.
+
+Look at the data type that was printed out at the top of the column for ``TimeSpan`` it's not numeric, or integer, or any of the normal data types in R. It say ``<Duration>``
+
+
+What do you think will happen if we try to make to make a histogram for ``TimeSpan?``
+
+```{r}
+
+london_by_theater %>% 
+               filter(TotalEvents > 100) %>% 
+               ggplot(aes(as.numeric(TimeSpan, 'year'))) +
+               geom_histogram()
+
+
+```
+
+
+```{r}
+
+london_by_theater %>% 
+               mutate(TimeSpan = as.numeric(TimeSpan, 'year'))
+
+```
+
+A number of these theaters had events for over a century!
+
+If we wanted to see the number of months that each theater had events, we would change the argument.
+
+
+```{r}
+
+london_by_theater %>% 
+               mutate(TimeSpan = as.numeric(TimeSpan, 'month'))
+
+
+```
+
+We can use this kind of transformation to see the relationship between the number of events and length of time in operation. Convert the ``Duration`` object to a numeric value in months in order to make a plot.
+
+```{r}
+
+library(ggrepel)
+
+london_by_theater %>% 
+               mutate(TimeSpan = as.numeric(TimeSpan, 'month')) %>% 
+               filter(TotalEvents > 10) %>% 
+               ggplot(aes(x = TimeSpan, y = TotalEvents, label = TheatreCode)) + 
+               geom_label_repel(family = 'IBMPlexSans') +
+               geom_point() +
+               scale_x_log10() +
+               scale_y_log10() + 
+               labs( x = 'Months that theater was in operation',
+                     y = 'Total events staged by theater')
+
+```
+
+It makes sense that theaters open much longer had many more events, but we can also notice which theaters are particularly high or low in this chart. Theaters high in this chart hosted many events for how long they were in operation, and theaters low in this chart hosted few events for how long they were open
+

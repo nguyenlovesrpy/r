@@ -1,0 +1,94 @@
+---
+title: "TIDY TUESDAY HOTEL BOOKINGS AND RECIPES"
+author: "Nguyen_LSCM"
+date: "7/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+<font size = '10'> TIDYTUESDAY HOTEL BOOKINGS AND RECIPES </font>
+
+<br>
+
+Last week I published my first scrrencast showing how to use the tidymodels framework for machine learning and modeling in R. Today, I'm using this week TidyTuesday dataset on hotel bookings to show how to use one of the tidymodels packages recipes with some simple models 
+
+
+## Explore the data
+
+Our modeling goal here is to predict which hotel stays include children (vs do not include children or babies) based on other characteristics in this dataset such as which hotel the guests stay at, how much they pay. The paper that this data comes from points out that the distribuition of many of these variables (such as number of adults/children, room type, meals bought, country, and so forth) is different fr canceled vs not canceled hotel bookings. This is mostly because more information is gathered when guests check in; the biggest  contributor to these differences is not that people who cancel are different from people who do not.
+
+
+To build our models, let's filter to only the bookings that did not cancel and build a model to predict which hotel stays include children and which do not. 
+
+
+```{r}
+
+library(tidyverse)
+
+hotels <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-11/hotels.csv")
+
+
+hotel_stays <- hotels %>% 
+               filter(is_canceled == 0) %>% 
+               mutate(
+                              children = case_when(
+                                             children + babies > 0'children',
+                                             TRUE ~ 'none'
+                              ),
+                              required_car_parking_spaces = case_when(
+                                             required_car_parking_spaces> 0 ~ 'parking',
+                                             TRUE ~ 'none'
+                              )
+                              ) %>% 
+               select(-is_canceled, -reservation_status, -babies)
+
+hotel_stays
+               
+
+
+```
+
+```{r}
+
+hotel_stays %>% 
+               count(children)
+
+
+```
+
+There are more than 10x more hotel stays without children than with 
+
+
+When I have a new dataset like this one. I often use the ``skimr`` package to get an overview of the dataset's characteristics. The numeric variables here have different very different values and distributions (big vs small) 
+
+```{r}
+
+library(skimr)
+
+skim(hotel_stays)
+
+
+```
+
+How do the hotel stays of guest with/without children vary throughout the year? Is different in the city and the resort hotel? 
+
+```{r}
+
+hotel_stays %>% 
+               mutate(arrival_date_month = factor(arrival_date_month, levels = month.name)) %>% 
+               count(hotel, arrival_date_month, children) %>% 
+               group_by(hotel,children) %>% 
+               mutate(proportion = n/sum(n)) %>% 
+               ggplot(aes(x = arrival_date_month, y = proportion, fill = children)) + geom_col(position = 'dodge') + scale_y_continuous(labels = scales::percent_format()) +
+               facet_wrap(~hotel, nrow =2) + labs(
+                              x = NULL,
+                              y = 'Proportion of hotel stays',
+                              fill = NULL
+               )
+
+
+```
