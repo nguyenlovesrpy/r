@@ -1,0 +1,115 @@
+---
+title: "tiki_sendo_ecommerce"
+author: "Nguyen_LSCM"
+date: "3/25/2020"
+output: html_document
+---
+
+
+![Tiki_Product](C:/Users/DellPC/Desktop/vnecommerce/Tiki_Product)
+![Sendo_Product](C:/Users/DellPC/Desktop/vnecommerce/Sendo_Product)
+![Tiki_Location](C:/Users/DellPC/Desktop/vnecommerce/Tiki_Location)
+![Sendo_Location](C:/Users/DellPC/Desktop/vnecommerce/Sendo_Location)
+
+
+
+```{r, warning=FALSE,message=FALSE,include=FALSE}
+
+suppressMessages(library(tidyverse))
+suppressMessages(library(plotly))
+suppressMessages(library(stringr))
+suppressMessages(library(stringi))
+suppressMessages(library(lubridate))
+suppressMessages(library(viridis))
+suppressMessages(library(ggsci))
+suppressMessages(library(patchwork))
+suppressMessages(library(RColorBrewer))
+theme_set(theme_minimal())
+
+setwd("C:/Users/DellPC/Desktop/vnecommerce")
+
+sendo<-read.csv("sendo.csv",header=TRUE)
+tiki<- read.csv("tiki.csv",header=TRUE)
+
+pal<-c(brewer.pal(8,"PRGn"),brewer.pal(8,"YlOrRd"),brewer.pal(8,"BrBG"))
+
+sendo<-sendo%>% mutate(date=str_replace_all(date,pattern="T",replacement = " "))%>%mutate(date=as.POSIXct(date,format="%Y-%m-%d %H"))%>%mutate(hour=factor(hour(date)),weekday=factor(wday(date,abbr=TRUE,label=TRUE)))
+tiki<-tiki%>% mutate(date=str_replace_all(date,pattern="T",replacement = " "))%>%mutate(date=as.POSIXct(date,format="%Y-%m-%d %H"))%>%mutate(hour=factor(hour(date)),weekday=factor(wday(date,abbr=TRUE,label=TRUE)))
+
+gg1<-sendo%>% ggplot(aes(x=date,y=number))+geom_line(group=1,color="red",lwd=1)+xlab("Date")+ylab("Number of Searching for Sendo on google")+labs(title="The fluctuation of searching Sendo on Google")
+
+gg2<- sendo%>%group_by(hour)%>%summarise(number=sum(number))%>%ggplot(aes(x=fct_reorder(hour,desc(number)),y=number,fill=hour))+geom_col()+coord_flip()+xlab("Hour of a day")+ylab("The Frequency in each hour")+labs("The plot of searching Sendo on Google in each hour")+scale_color_manual(values = pal)
+
+gg3<- sendo%>%group_by(weekday)%>%summarise(number=sum(number))%>%ggplot(aes(x=fct_reorder(weekday,desc(number)),y=number,fill=weekday))+geom_col()+coord_flip()+xlab("weekday of a day")+ylab("The Frequency in each weekday")+labs("The plot of searching Sendo on Google in each weekday")+scale_fill_tron()
+
+gg4<-sendo%>%group_by(weekday,hour)%>%summarise(number=sum(number))%>%ggplot(aes(x=hour,y=weekday,fill=number,label=number))+geom_tile()+scale_fill_viridis(option="D")+geom_label()+xlab("Hour")+ylab("Weekday")+labs(title = "Sendo, Hour versus Weekday")+geom_label(label.size = 3, fill="white")
+
+gg5<-tiki%>%group_by(weekday,hour)%>%summarise(number=sum(number))%>%ggplot(aes(x=hour,y=weekday,fill=number,label=number))+geom_tile()+scale_fill_viridis(option="D")+geom_label()+xlab("Hour")+ylab("Weekday")+labs(title = "Tiki, Hour versus Weekday")+geom_label(label.size = 3, fill="white")
+
+```
+
+
+
+# Introduction
+
+1. WHO
+- Sendo and Tiki are  Vietnam start-up companieS in e-commerce. **But** THEY ARE VERY DIFFERENT FROM ``STRATEGY``.
+
+<hr>
+
+2. WHY
+
+- `THE MAIN REASON`  IS *CUSTOMER SEGMENt*. 
+
+<hr>
+
+3. HOW TO PROVE 
+
+               - Time to search on Google---> Time to work.
+               - Location of customers ---> Where are customers from?
+               - Range of product --> Price, Customer needed items?
+               
+<hr>
+
+
+
+ **Sendo-Countryside and Tiki-City**
+ 
+ 
+
+##Time to go shopping
+
+```{r, warning=FALSE, message=FALSE,echo=FALSE,fig.align="left",fig.width=10,fig.height=10}
+
+ggplotly(gg1)
+
+```
+
+
+```{r, warning=FALSE, message=FALSE,echo=FALSE,fig.align="left",fig.width=10,fig.height=10}
+
+ggplotly(gg2)
+
+```
+
+```{r, warning=FALSE, message=FALSE,echo=FALSE,fig.align="left",fig.width=10,fig.height=10}
+ggplotly(gg3)
+
+```
+
+
+```{r, warning=FALSE, message=FALSE,echo=FALSE,fig.align="left",fig.width=10,fig.height=10}
+gg4
+```
+
+``````{r, warning=FALSE, message=FALSE,echo=FALSE,fig.align="left",fig.width=10,fig.height=10}
+
+gg4/gg5
+
+```
+
+
+##Product
+
+
+
