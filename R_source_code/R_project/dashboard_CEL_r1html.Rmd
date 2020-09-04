@@ -1,0 +1,141 @@
+---
+title: "Untitled"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(scales)
+library(RColorBrewer)
+library(DT)
+library(leaflet)
+library(plotly)
+library(ggsci)
+library(kableExtra)
+library(xts)
+library(dygraphs)
+
+setwd("C:/Users/DellPC/Desktop/CEL_R1_FSCT_138/CEL_R1_FSCT_138")
+cus<-read.csv("shipment_by_customer_result.csv",header=TRUE)
+master<-read.csv("customer_master_result.csv",header = TRUE)
+
+cus<- cus%>%left_join(master,by=c("CustomerId"="CusId"))
+
+
+
+so<-read.csv("sales_orders_result.csv",header=TRUE)
+shipment<-read.csv("shipment_by_customer_result.csv",header=TRUE)%>%select(CustomerId,AbcClass)
+
+so<-so%>%left_join(shipment,by=c("SoCustomerId"="CustomerId"))%>%mutate(Sales=SoQuantity*SoUnitCost)%>%select(SoEnteredDate,SoCustomerId,SoProductId,Sales,AbcClass)%>%mutate(SoEnteredDate=as.Date(SoEnteredDate))
+
+
+```
+
+Column {data-height=500}
+----------------------------------
+
+### Map for each customer
+
+```{r}
+
+pal<-colorFactor(c("red","darkorchid","green"),domain = c("A","B","C"))
+pal1 <- colorNumeric(c("red", "green", "blue"), 1:10)
+
+cus<-cus%>%mutate(content = paste(sep="<br/>",
+  CustomerId,
+  SalesValue, 
+  AbcClass))
+
+leaflet(cus)%>%addTiles()%>%
+    addProviderTiles(providers$Stamen.TonerLines,
+                     options = providerTileOptions(opacity = 0.35)) %>%
+    addProviderTiles(providers$Stamen.TonerLabels)%>% addCircleMarkers(lng=~Longitude,lat = ~Latitude,label = ~CustomerId,color = ~pal(AbcClass),stroke = FALSE,fillOpacity = 0.7)%>%addPopups(lng = ~Longitude,lat=~Latitude,popup = ~content,options=popupOptions(closeOnClick = FALSE,closeButton = TRUE))
+```
+
+Column {data-height=500} {.tabset .tabset-fade .tabset-pills}
+----------------------------------
+
+### Average Quantity Pre Order (Kg)
+
+```{r}
+gg<-cus%>% arrange(desc(AverageQuantityPerOrderKg))%>%head(30)%>%ggplot(aes(x=fct_reorder(CustomerId,AverageQuantityPerOrderKg),y=AverageQuantityPerOrderKg))+geom_bar(stat="identity",aes(fill=AbcClass))+theme_minimal()+coord_flip()+scale_fill_aaas()+labs(title="Top 30 highest that have average Quantity Per Order", x="Average Quantity Per Order",y="Customer")
+
+
+ggplotly(gg)
+
+```
+
+
+### The Line for Sales Value Percent (Cummulative)
+
+```{r}
+
+gg1<-cus%>%mutate(cm=as.numeric(str_remove(as.character(CumulativeValueSharePercent),pattern = "%")))%>%arrange(cm)%>%mutate(number=row_number())%>%ggplot(aes(x=number,y=cm))+geom_line(aes(group=1,color=AbcClass),lwd=1)+theme_minimal()+scale_y_continuous(breaks = 20*(1:5),labels = label_percent(scale = 1))+labs(x="Number of customer in each class",y="Cummulative Percent",title="Line show the change of customer in each class")
+ggplotly(gg1)
+
+
+```
+
+Column {data-height=500} {.tabset .tabset-fade .tabset-pills}
+----------------------------------
+
+### Customer-Time series
+
+```{r, echo=FALSE}
+
+so1<-so%>%group_by(SoEnteredDate,AbcClass)%>%summarise(Sales=sum(Sales))
+
+so_A<- so1 %>%filter(AbcClass=="A")
+so_B<-so1%>%filter(AbcClass=="B")
+so_C<-so1%>%filter(AbcClass=="C")
+
+so_A_ts<-xts(x=so_A$Sales,order.by = as.Date(so_A$SoEnteredDate))
+so_B_ts<-xts(x=so_B$Sales,order.by = as.Date(so_B$SoEnteredDate))
+so_C_ts<-xts(x=so_C$Sales,order.by = as.Date(so_C$SoEnteredDate))
+
+so_ts<-cbind(so_A_ts,so_B_ts,so_C_ts)
+
+dygraph(so_ts,main="The frequency of each AbcCLass")%>%dyRangeSelector(height=20)%>%dyOptions(fillGraph = TRUE,stackedGraph = TRUE,fillAlpha = 0.5,pointSize =3,drawPoints = TRUE,pointShape = "star")%>%dyHighlight(highlightCircleSize = 3,highlightSeriesBackgroundAlpha =0.3,highlightSeriesOpts = list(strokeWidth = 3),hideOnMouseOut = FALSE)%>%dyAxis(name="x",label = "Time are from July to December")%>%dyAxis(name="y",label="The number of Sales")%>%dySeries(name="so_A_ts",label="Class A")%>%dySeries(name="so_B_ts",label="Class B")%>%dySeries(name="so_C_ts",label = "Class C")%>%dyLegend(show ="alway",hideOnMouseOut = FALSE)%>%  dyShading(from = "2017-08-31", to = "2017-09-30", color = "#FFE6E6") %>%
+  dyShading(from = "2017-11-10", to = "2017-12-10", color = "#CCEBD6")
+
+```
+
+
+### Supplier - Time series
+
+```{r, echo=FALSE}
+
+
+so2<-so%>%group_by(SoEnteredDate,SoProductId)%>%summarise(Sales=sum(Sales))%>%arrange(desc(Sales))%>%mutate(AbcdClass=ifelse(Sales>155067407,"A",ifelse(Sales<155067408 & Sales>140231279,"B",ifelse(Sales<36232,"D","C"))))%>%ungroup()%>%group_by(SoEnteredDate,AbcdClass)%>%summarise(Sales=sum(Sales))
+
+so_A<- so2 %>%filter(AbcdClass=="A")
+so_B<-so2%>%filter(AbcdClass=="B")
+so_C<-so2%>%filter(AbcdClass=="C")
+so_D<-so2%>%filter(AbcdClass=="D")
+
+so_A_ts<-xts(x=so_A$Sales,order.by = as.Date(so_A$SoEnteredDate))
+so_B_ts<-xts(x=so_B$Sales,order.by = as.Date(so_B$SoEnteredDate))
+so_C_ts<-xts(x=so_C$Sales,order.by = as.Date(so_C$SoEnteredDate))
+so_D_ts<-xts(x=so_D$Sales,order.by = as.Date(so_D$SoEnteredDate))
+
+so_ts<-cbind(so_A_ts,so_B_ts,so_C_ts,so_D_ts)
+
+dygraph(so_ts,main="The frequency of each AbcCLass")%>%dyRangeSelector(height=20)%>%dyOptions(fillGraph = TRUE,stackedGraph = TRUE,fillAlpha = 0.5,pointSize =3,drawPoints = TRUE,pointShape = "star")%>%dyHighlight(highlightCircleSize = 3,highlightSeriesBackgroundAlpha =0.3,highlightSeriesOpts = list(strokeWidth = 3),hideOnMouseOut = FALSE)%>%dyAxis(name="x",label = "Time are from July to December")%>%dyAxis(name="y",label="The number of Sales")%>%dySeries(name="so_A_ts",label="Class A")%>%dySeries(name="so_B_ts",label="Class B")%>%dySeries(name="so_C_ts",label = "Class C")%>%dySeries(name="so_D_ts",label = "Class D")%>%dyLegend(show ="alway",hideOnMouseOut = FALSE)%>%  dyShading(from = "2017-08-31", to = "2017-09-30", color = "#FFE6E6") %>%
+  dyShading(from = "2017-11-10", to = "2017-12-10", color = "#CCEBD6")
+
+
+```
+
+### Supplier-Classfication
+
+```{r, echo=FALSE}
+so%>%group_by(SoEnteredDate,SoProductId)%>%summarise(Sales=sum(Sales))%>%arrange(desc(Sales))%>%mutate(AbcdClass=ifelse(Sales>155067407,"A",ifelse(Sales<155067408 & Sales>140231279,"B",ifelse(Sales<36232,"D","C"))))%>%ungroup()%>%select(SoProductId,AbcdClass)%>%distinct()%>%kable()%>%kable_styling()
+
+
+```
+
+
+

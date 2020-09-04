@@ -1,0 +1,193 @@
+---
+title: "house_price"
+author: "Nguyen_LSCM"
+date: "5/1/2020"
+output: html_document
+---
+
+
+# Load libraries and dataset
+```{r, include=FALSE}
+
+library(tidyverse)
+library(tidymodels)
+library(DT)
+library(scales)
+library(viridis)
+library(d3heatmap)
+library(highcharter)
+library(ggsci)
+library(plotly)
+library(ggthemes)
+library(treemap)
+library(crosstalk)
+library(RColorBrewer)
+library(lubridate)
+library(zoo)
+
+setwd("C:/Users/DellPC/Desktop/R_source_code/avocado-prices")
+
+avocado<- read.csv("avocado.csv",header=TRUE,stringsAsFactors = FALSE)%>%select(-1)%>% filter(region!="TotalUS")
+
+colnames(avocado)<-c("date","avg.price","total.volume","x4046","x4225","x4770","total.bags","small.bags","large.bags","xlarge.bags","type","year","region")
+
+
+```
+
+
+# View the data
+
+```{r, echo=FALSE,warning=FALSE}
+
+avocado%>% head(10)%>%datatable()
+
+a<-avocado%>%select(-year,-region,-type,-date)
+
+hchart(cor(a))
+
+```
+
+# Visualize
+
+## Region 
+
+### Year vs Total Volume
+
+```{r, echo=FALSE, warning=FALSE}
+
+hc<-highchart()
+df<- avocado%>%group_by(region,year)%>%summarise(total.volume=sum(total.volume))%>%filter(region!="TotalUS")
+
+gg<-df%>%ungroup()%>%mutate(region=fct_reorder2(region,as.numeric(year),desc(total.volume)))%>%ggplot(aes(x=region,y=total.volume,fill=as.factor(year)))+geom_bar(stat="identity",position ="stack" )+theme_light()+labs(fill="")+scale_fill_aaas()+theme(axis.text.y = element_text(angle=0,face="bold",family = "lato",size=8))+ylab("Volume of each state")+coord_flip()+xlab("Region of US")+ggtitle(label="The total volume of avocado in US", subtitle = "From 2015 to 2018")
+
+
+
+```
+
+### Price 
+
+```{r, echo=FALSE, warning=FALSE}
+
+gg<-avocado%>%group_by(region)%>%mutate(med=median(avg.price))%>%ungroup()%>%mutate(region=fct_reorder(region,desc(med)))%>%ggplot(aes(x=region,y=avg.price,fill=region))+geom_boxplot()+coord_flip()+theme_pander()+theme(legend.title = element_blank(),legend.position = "right")+xlab("Price")+ylab("Region")+scale_fill_viridis(discrete = TRUE,option = "D")
+
+ggplotly(gg)
+
+
+```
+
+
+### Ratio of Organic per Conventional
+
+```{r,echo=FALSE, warning=FALSE}
+
+df<-avocado%>%filter(region!="TotalUS")%>%group_by(region,type)%>%summarise(total.volume=sum(total.volume))%>%ungroup()%>%spread(key=type,value=total.volume)%>%mutate(organic_per_conventional=organic/conventional)%>%arrange(desc(organic_per_conventional))
+
+
+
+tm<-treemap(df,index="region",vColor="organic_per_conventional",palette=brewer.pal(8,"Reds"),draw=TRUE,vSize = "organic_per_conventional")
+
+hctreemap(tm, allowDrillToNode = TRUE, layoutAlgorithm = "squarified") %>% 
+    hc_title(text = "The Ratio of Organic and Conventional Type")
+
+```
+
+
+
+### Type of Avocado
+
+```{r, warning=FALSE, echo=FALSE}
+
+df<- avocado%>%select(c(x4046,x4225,x4770,region))%>%group_by(region)%>%summarise(x4046=sum(x4046),x4225=sum(x4225),x4770=sum(x4770))%>%as.data.frame()%>%select(-1)
+
+p=""
+for ( i in c(1:length(df$region))){
+
+  p=paste(p,df$region[i],sep="','")
+}
+
+
+rownames(df)<-c('Albany','Atlanta','BaltimoreWashington','Boise','Boston','BuffaloRochester','California','Charlotte','Chicago','CincinnatiDayton','Columbus','DallasFtWorth','Denver','Detroit','GrandRapids','GreatLakes','HarrisburgScranton','HartfordSpringfield','Houston','Indianapolis','Jacksonville','LasVegas','LosAngeles','Louisville','MiamiFtLauderdale','Midsouth','Nashville','NewOrleansMobile','NewYork','Northeast','NorthernNewEngland','Orlando','Philadelphia','PhoenixTucson','Pittsburgh','Plains','Portland','RaleighGreensboro','RichmondNorfolk','Roanoke','Sacramento','SanDi','SanDiego','SanFrancisco','Seattle','SouthCarolina','SouthCentral','Southeast','Spokane','StLouis','Syracuse','Tampa','West','WestTexNewMexico')
+
+d3heatmap(df,scale="column",colors="Reds")
+
+
+```
+
+### Type of Bags
+
+```{r, warning=FALSE, echo=FALSE}
+
+df<- avocado%>%select(c(small.bags,large.bags,xlarge.bags,region))%>%group_by(region)%>%summarise(small.bags=sum(small.bags),large.bags=sum(large.bags),xlarge.bags=sum(xlarge.bags))%>%as.data.frame()%>%select(-1)
+
+p=""
+for ( i in c(1:length(df$region))){
+
+  p=paste(p,df$region[i],sep="','")
+}
+
+rownames(df)<-c('Albany','Atlanta','BaltimoreWashington','Boise','Boston','BuffaloRochester','California','Charlotte','Chicago','CincinnatiDayton','Columbus','DallasFtWorth','Denver','Detroit','GrandRapids','GreatLakes','HarrisburgScranton','HartfordSpringfield','Houston','Indianapolis','Jacksonville','LasVegas','LosAngeles','Louisville','MiamiFtLauderdale','Midsouth','Nashville','NewOrleansMobile','NewYork','Northeast','NorthernNewEngland','Orlando','Philadelphia','PhoenixTucson','Pittsburgh','Plains','Portland','RaleighGreensboro','RichmondNorfolk','Roanoke','Sacramento','SanDi','SanDiego','SanFrancisco','Seattle','SouthCarolina','SouthCentral','Southeast','Spokane','StLouis','Syracuse','Tampa','West','WestTexNewMexico')
+
+d3heatmap(df,scale="column",colors="Set3")
+
+
+```
+
+## Price
+
+### Series
+
+```{r, warning=FALSE, echo=FALSE}
+
+df<- avocado%>%select(avg.price,date,region)%>%mutate(date=as.Date(date,format="%Y-%m-%d"),month=month(date,abbr = TRUE,label=TRUE),year=year(date),weekday=wday(date,label=TRUE),m_y=as.yearmon(date))
+
+```
+
+#### Each month of each year
+
+```{r, warning=FALSE, echo=FALSE}
+
+dt<-df%>% group_by(m_y,region)%>%summarise(avg.price=mean(avg.price))
+
+
+
+shared_df<-SharedData$new(dt,group="hello")
+
+gg<- shared_df%>%ggplot(aes(x=m_y,y=avg.price))+geom_line(aes(group=region,color=region))+theme_fivethirtyeight()+xlab("Year")+ylab("Average Price")+labs(title="The price through year to year",fill="")
+
+bscols(filter_select("region",sharedData = shared_df,label="Select Region",group = ~region),ggplotly(gg),widths=c(12,12))
+
+
+
+
+```
+
+#### Each month
+
+```{r, warning=FALSE, echo=FALSE}
+
+gg<-df%>%group_by(month)%>%summarise(avg.price=mean(avg.price))%>%ungroup()%>%mutate(month=fct_reorder(month,desc(avg.price)))%>%ggplot(aes(x=month,y=avg.price))+geom_bar(stat="identity",aes(fill=month))+labs(fill=NULL)+ylab("Average Price")+xlab("Month")+theme_fivethirtyeight()+theme(legend.position = "NULL")
+
+ggplotly(gg)
+
+df%>%group_by(month,year)%>%summarise(avg.price=mean(avg.price))%>%ungroup()%>%mutate(month=fct_reorder(month,desc(avg.price)))%>%ggplot(aes(x=month,y=year))+geom_tile(aes(fill=avg.price))+scale_fill_gradient2_tableau()+theme_pander()
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

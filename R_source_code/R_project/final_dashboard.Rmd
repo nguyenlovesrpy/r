@@ -1,0 +1,699 @@
+---
+title: "Logistics Serivces"
+author: "NguyenLSCM"
+date: "April 18 2020"
+output:
+               flexdashboard::flex_dashboard:
+               theme: sandstone
+               vertical_layout: scroll
+               highlight: monochrome
+               df_print: paged
+               toc: true
+               number_sections: true
+---
+
+
+
+```{r,include=FALSE}
+
+library(tidyverse)
+library(tidymodels)
+library(DT)
+library(dygraphs)
+library(scales)
+library(RColorBrewer)
+library(viridis)
+library(lubridate)
+library(gridExtra)
+library(skimr)
+library(xts)
+library(zoo)
+library(plotly)
+library(leaflet)
+library(rjson)
+library(flexdashboard)
+library(corrplot)
+library(rsample)
+library(broom)
+library(collapsibleTree)
+library(wordcloud)
+library(tidytext)
+library(tidyr)
+library(GGally)
+library(radarchart)
+```
+
+```{r, include=FALSE}
+
+setwd("C:/Users/DellPC/Desktop/R_source_code/logistics_service_usa")
+
+us_state<-read.csv("us_state.csv",header=TRUE)
+df<- read.csv("global_superstore.csv")
+
+dt<-df%>%mutate(Order.Date=as.Date(Order.Date,format="%m/%d/%Y"),Ship.Date=as.Date(Ship.Date,format="%m/%d/%Y"))%>% mutate(leadtime=Ship.Date-Order.Date)%>%na.omit()
+
+```
+
+```{r, include=FALSE}
+df2<-dt%>%select(Sales,Profit,leadtime,Shipping.Cost)%>%mutate(leadtime=as.numeric(leadtime))
+winesNorm <- as.data.frame(scale(df2))
+
+bss <- numeric()
+wss <- numeric()
+
+# Run the algorithm for different values of k 
+set.seed(1234)
+
+for(i in 1:10){
+
+  # For each k, calculate betweenss and tot.withinss
+  bss[i] <- kmeans(winesNorm, centers=i)$betweenss
+  wss[i] <- kmeans(winesNorm, centers=i)$tot.withinss
+
+}
+
+# Between-cluster sum of squares vs Choice of k
+p3 <- qplot(1:10, bss, geom=c("point", "line"), 
+            xlab="Number of clusters", ylab="Between-cluster sum of squares") +
+  scale_x_continuous(breaks=seq(0, 10, 1)) +
+  theme_bw()
+
+# Total within-cluster sum of squares vs Choice of k
+p4 <- qplot(1:10, wss, geom=c("point", "line"),
+            xlab="Number of clusters", ylab="Total within-cluster sum of squares") +
+  scale_x_continuous(breaks=seq(0, 10, 1)) +
+  theme_bw()
+
+# Subplot
+grid.arrange(p3, p4, ncol=2)
+
+
+
+```
+
+```{r,include=FALSE}
+
+skimr::skim(dt)
+
+
+```
+
+<style>                     
+.navbar {
+  background-color:green;
+  border-color:orange;
+}
+.navbar-brand {
+color:red!important;
+}
+</style>  
+
+``` {js}
+// Inverse color of navigation bar.
+$('.navbar-inverse').removeClass('navbar-inverse').addClass('navbar-default');
+```
+Customer 
+===============================================================================
+
+Column {data-height=750} {.tabset .tabset-fade .tabset-pills}
+-------------------------------------------------------------
+
+### First Class
+
+```{r, echo=FALSE, fig.width=8,fig.height=8}
+
+dt1<- dt%>%mutate(Ship.Mode=fct_recode(as.factor(Ship.Mode),"Same_Day"="Same Day","First_Class"="First Class","Second_Class"="Second Class","Standard_Class"="Standard Class"))
+
+df<-spread(data=dt1,key=Ship.Mode,value = leadtime)%>%select(c("Order.Date","First_Class","Second_Class","Same_Day","Standard_Class"))
+
+df<-df%>%mutate(First_Class=ifelse(is.na(First_Class),0,First_Class),Second_Class=ifelse(is.na(Second_Class),0,Second_Class),Standard_Class=ifelse(is.na(Standard_Class),0,Standard_Class),Same_Day=ifelse(is.na(Same_Day),0,Same_Day))
+
+
+First_Class<- df%>%select(First_Class,Order.Date)%>%mutate(Date=as.yearmon(Order.Date))%>%group_by(Date)%>%summarise(First_Class=sum(First_Class))
+First_Class<-ts(First_Class$First_Class, start=c(01,2014),frequency = 12)
+
+
+Second_Class<- df%>%select(Second_Class,Order.Date)%>%mutate(Date=as.yearmon(Order.Date))%>%group_by(Date)%>%summarise(Second_Class=sum(Second_Class))
+Second_Class<-ts(Second_Class$Second_Class, start=c(01,2014),frequency = 12)
+
+
+Standard_Class<- df%>%select(Standard_Class,Order.Date)%>%mutate(Date=as.yearmon(Order.Date))%>%group_by(Date)%>%summarise(Standard_Class=sum(Standard_Class))
+Standard_Class<-ts(Standard_Class$Standard_Class, start=c(01,2014),frequency = 12)
+
+
+Same_Day<- df%>%select(Same_Day,Order.Date)%>%mutate(Date=as.yearmon(Order.Date))%>%group_by(Date)%>%summarise(Same_Day=sum(Same_Day))
+Same_Day<-ts(Same_Day$Same_Day, start=c(01,2014),frequency = 12)
+
+
+dt_ts<-cbind(First_Class,Second_Class,Standard_Class,Same_Day)
+
+
+dygraph(First_Class, main = "Lead time of First_CLass during the time", group =
+                       "Class") %>% dyHighlight(
+                                      highlightCircleSize = 7,
+                                      highlightSeriesBackgroundAlpha = 1,
+                                      hideOnMouseOut = TRUE
+                       ) %>% dyAxis(name = "x", label = "First Class") %>% dyAxis(name = "y", label =
+                                                                                                 "Lead time") %>% dyLegend(show = "follow", hideOnMouseOut = FALSE) %>%  dyShading(from = "2017-08-31", to = "2017-09-30", color = "#FFE6E6") %>%
+               dyShading(from = "2017-11-10", to = "2017-12-10", color = "#CCEBD6") %>% dyRangeSelector(height =
+                                                                                                                       20) %>% dyOptions(
+                                                                                                                                      fillGraph = TRUE,
+                                                                                                                                      pointShape = "star",
+                                                                                                                                      drawPoints = TRUE,
+                                                                                                                                      colors = "purple",
+                                                                                                                                      gridLineColor = "black",
+                                                                                                                                      drawGrid = TRUE,
+                                                                                                                                      strokeBorderColor = "white",
+                                                                                                                                      pointSize = 5
+                                                                                                                       ) %>% dySeries(label = "First Class")
+
+```
+
+### Second Class
+
+```{r, echo=FALSE, fig.width=8,fig.height=8}
+
+dygraph(Second_Class, main = "Lead time of Second_CLass during the time", group =
+                       "Class") %>% dyHighlight(
+                                      highlightCircleSize = 7,
+                                      highlightSeriesBackgroundAlpha = 1,
+                                      hideOnMouseOut = TRUE
+                       ) %>% dyAxis(name = "x", label = "Second Class") %>% dyAxis(name = "y", label =
+                                                                                                  "Lead time") %>% dyLegend(show = "follow", hideOnMouseOut = FALSE) %>%  dyShading(from = "2017-08-31", to = "2017-09-30", color = "#FFE6E6") %>%
+               dyShading(from = "2017-11-10", to = "2017-12-10", color = "#CCEBD6") %>% dyRangeSelector(height =
+                                                                                                                       20) %>% dyOptions(
+                                                                                                                                      fillGraph = TRUE,
+                                                                                                                                      pointShape = "star",
+                                                                                                                                      drawPoints = TRUE,
+                                                                                                                                      colors = "blue",
+                                                                                                                                      gridLineColor = "black",
+                                                                                                                                      drawGrid = TRUE,
+                                                                                                                                      strokeBorderColor = "white",
+                                                                                                                                      pointSize = 5
+                                                                                                                       ) %>% dySeries(label = "Second Class")
+
+```
+
+### Standard Class
+
+```{r, echo=FALSE, fig.width=8,fig.height=8}
+
+dygraph(Standard_Class, main = "Lead time of Standard_Class during the time", group =
+                       "Class") %>% dyHighlight(
+                                      highlightCircleSize = 7,
+                                      highlightSeriesBackgroundAlpha = 1,
+                                      hideOnMouseOut = TRUE
+                       ) %>% dyAxis(name = "x", label = "Standard Class") %>% dyAxis(name = "y", label =
+                                                                                                    "Lead time") %>% dyLegend(show = "follow", hideOnMouseOut = FALSE) %>%  dyShading(from = "2017-08-31", to = "2017-09-30", color = "#FFE6E6") %>%
+               dyShading(from = "2017-11-10", to = "2017-12-10", color = "#CCEBD6") %>% dyRangeSelector(height =
+                                                                                                                       20) %>% dyOptions(
+                                                                                                                                      fillGraph = TRUE,
+                                                                                                                                      pointShape = "star",
+                                                                                                                                      drawPoints = TRUE,
+                                                                                                                                      colors = "black",
+                                                                                                                                      gridLineColor = "black",
+                                                                                                                                      drawGrid = TRUE,
+                                                                                                                                      strokeBorderColor = "white",
+                                                                                                                                      pointSize = 5
+                                                                                                                       ) %>% dySeries(label = "Standard Class")
+
+```
+
+
+### Same Day
+
+```{r, echo=FALSE, fig.width=8,fig.height=8}
+
+dygraph(Same_Day, main = "Lead time of Same_Day, during the time", group =
+                       "Class") %>% dyHighlight(
+                                      highlightCircleSize = 7,
+                                      highlightSeriesBackgroundAlpha = 1,
+                                      hideOnMouseOut = TRUE
+                       ) %>% dyAxis(name = "x", label = "Same Day") %>% dyAxis(name = "y", label =
+                                                                                              "lead time") %>% dyLegend(show = "follow", hideOnMouseOut = FALSE) %>%  dyShading(from = "2017-08-31", to = "2017-09-30", color = "#FFE6E6") %>%
+               dyShading(from = "2017-11-10", to = "2017-12-10", color = "#CCEBD6") %>% dyRangeSelector(height =
+                                                                                                                       20) %>% dyOptions(
+                                                                                                                                      fillGraph = TRUE,
+                                                                                                                                      pointShape = "star",
+                                                                                                                                      drawPoints = TRUE,
+                                                                                                                                      colors = "red",
+                                                                                                                                      gridLineColor = "black",
+                                                                                                                                      drawGrid = TRUE,
+                                                                                                                                      strokeBorderColor = "white",
+                                                                                                                                      pointSize = 5
+                                                                                                                       ) %>% dySeries(label = "Same Day")
+
+```
+
+### Customer Segment
+
+```{r, echo=FALSE}
+
+df<-dt%>%group_by(Segment)%>% summarise(Sales=sum(Sales),Profit=sum(Profit))%>%mutate(Segment=fct_reorder2(Segment,desc(Sales),desc(Profit)))%>% gather(key="KPI",value="money",2:3)
+
+seg_gg<-df%>%ggplot(aes(x=Segment,y=money,fill=KPI))+geom_bar(stat="identity",position = "dodge")+scale_fill_manual(values=c("darkred","palegreen"))+theme_classic()+labs(title = "The contribution of 3 Customer Segments")+xlab("Customer Segment")+ylab("The revenue and profit of each Customer Segment")+scale_y_continuous(label=comma)
+
+ggplotly(seg_gg)
+
+```
+
+### Customer_Shipping.Mode
+
+```{r, echo=FALSE}
+
+df<-dt%>%group_by(Ship.Mode)%>% summarise(Sales=sum(Sales),Profit=sum(Profit))%>%mutate(Ship.Mode=fct_reorder2(Ship.Mode,desc(Sales),desc(Profit)))%>% gather(key="KPI",value="money",2:3)
+
+sh_gg<-df%>%ggplot(aes(x=Ship.Mode,y=money,fill=KPI))+geom_bar(stat="identity",position = "dodge")+scale_fill_manual(values=c(brewer.pal(8,"Pastel1")))+theme_bw()+labs(title = "The contribution of Shipping Mode")+xlab("Ship.Mode Segment")+ylab("The revenue and profit of each Ship.Mode Segment")+scale_y_continuous(label=comma)+coord_flip()
+
+ggplotly(sh_gg)
+
+```
+
+### Customer in each country
+```{r, echo=FALSE}
+df<-dt%>%group_by(State)%>% summarise(Sales=sum(Sales),Profit=sum(Profit))%>%mutate(State=fct_reorder2(State,desc(Sales),desc(Profit)))%>% gather(key="KPI",value="money",2:3)
+
+ct_gg <-
+               df %>% ggplot(aes(x = State, y = money, fill = KPI)) + geom_bar(stat = "identity", position = "dodge") +
+               scale_fill_manual(values = c("darkred", "cyan")) + theme_minimal() + labs(title = "The contribution of each State") +
+               xlab("Ship.Mode Segment") + ylab("The revenue and profit of each Ship.Mode Segment") +
+               scale_y_continuous(label = comma) + theme(axis.text.x = element_blank()) +
+               coord_flip()
+
+ggplotly(ct_gg)
+
+
+```
+
+### Customer Location
+
+```{r, echo=FALSE}
+
+
+df<-inner_join(dt,us_state,by=c("State"="Place.Name"))%>%mutate(content=paste(sep="<br/>",State,Sales,Profit))
+
+df<-df%>%mutate(State=as.character(State))%>%group_by(Category,State,Longitude,Latitude)%>% summarise(Sales=sum(Sales),Profit=sum(Profit))%>%ungroup()%>%mutate(State=fct_reorder2(State,desc(Sales),desc(Profit)))
+
+
+df_map<- df%>%arrange(desc(Sales))%>%mutate(row=c(1:133),Class=ifelse(row<30,"A",ifelse(row>29&row<59,"B",ifelse(row>79,"D","C"))))%>%mutate(content=paste(sep="<br/>",State,Sales,Profit))
+
+category<-df_map%>%split(df_map$Category)
+
+
+pal<-colorFactor(c("white","lightpink","palegreen","lightyellow"),domain = c("A","B","C","D"))
+
+pal1<-colorQuantile("YlGn",NULL,8)
+
+
+
+
+leaflet() %>% addTiles() %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
+               addProviderTiles(providers$Stamen.TonerLines,
+                                options = providerTileOptions(opacity = 0.35)) %>%
+               addProviderTiles(providers$Stamen.TonerLabels) %>% addCircleMarkers(
+                              data = df_map,
+                              lng =  ~ Longitude,
+                              lat = ~ Latitude,
+                              label = ~ State,
+                              color = ~ pal1(log10(Sales) * 3),
+                              radius = ~ log10(Sales) * 6,
+                              stroke = FALSE,
+                              fillOpacity = 0.7
+               ) %>% addPopups(
+                              data = df_map,
+                              lng = ~ Longitude,
+                              lat =  ~ Latitude,
+                              popup = ~ content,
+                              options = popupOptions(closeOnClick = TRUE, closeButton = TRUE)
+               ) %>% addLayersControl(overlayGroups = names(category),
+                                      options = layersControlOptions(collapsed = FALSE))
+
+
+
+
+
+```
+
+Column {data-height=250}  
+-------------------------------------------------------------
+
+### Average of Sales <font size='4'> "Average of Sales" </font>
+
+```{r fig.height=12}
+
+m_pr<-dt%>%group_by(State)%>%summarise(Sales=sum(Sales),Profit=sum(Profit),Shipping.Cost=sum(Shipping.Cost))%>%ungroup()%>%mutate(Sales=mean(Sales),Profit=mean(Profit),Shipping.Cost=mean(Shipping.Cost))%>%head(1)
+
+
+# Average Sales of total US States
+mean<- round(m_pr$Sales, 2)
+
+# Create value box
+valueBox(mean, icon = "fa-plus", color = 'firebrick')
+```
+
+### Average of Profit <font size='4'> "Average of Profit" </font>
+
+```{r fig.height=12}
+# Average Profits of total US States
+profit<- round(m_pr$Profit, 2)
+
+# Create value box
+valueBox(profit, icon = "fa-plus", color = 'success')
+```
+
+### Average of Shipping Cost <font size='4'> "Average of Shipping Cost" </font>
+
+```{r fig.height=12}
+# Average Shipping Cost of total US States
+Shipping.Cost<- round(m_pr$Shipping.Cost, 2)
+
+# Create value box
+valueBox(Shipping.Cost, icon = "fa-plus", color = 'warning')
+```
+
+### Distribution of leadtime
+
+```{r}
+
+gg_hist<-dt%>%ggplot(aes(x=leadtime,y=..density..))+geom_histogram(bins=30,color="white",fill="darkred")+geom_density(color="white",fill="lightgreen",alpha=0.5)+theme_minimal()+labs(title="The leadtime distribution")+xlab("Leadtime")+ylab("Density")
+
+ggplotly(gg_hist)
+
+
+```
+
+
+
+
+Product and Customer Information
+==================================================================================
+
+
+Row  {data-width=400}
+-------------------------------------------------------------
+```{r}
+
+Product<-dt%>%select(Category,Sub.Category)
+
+Product%>%group_by(Category,Sub.Category)%>%summarise(`Number of Product Name`=n())%>%collapsibleTreeSummary(hierarchy = c("Category","Sub.Category"),root="Product",width=300,attribute = "Number of Product Name",zoomable = TRUE,fillFun = colorspace::diverging_hsv)
+
+
+
+
+```
+
+
+Row {data-width=600}
+-------------------------------------------------------------
+```{r}
+
+Customer<- dt%>%select(Segment,State)
+
+Customer%>%group_by(Segment,State)%>%summarise(`Number of Customer`=n())%>%collapsibleTreeSummary(hierarchy = c("Segment","State"),root="Product",width=900,height=900,attribute = "Number of Customer",zoomable = TRUE,fillFun = colorspace::terrain_hcl)
+
+
+
+
+
+```
+
+
+
+
+
+Product
+======================================================================================
+
+
+Column {data-height=300}
+-------------------------------------------------------------
+
+### Category <font size='4'> "Profit ratio Sales of Furniture Cateogry" </font>
+
+```{r, echo=FALSE,fig.width=0.8}
+
+cate<-dt%>%group_by(Category)%>%summarise(Profit_per_Sales=sum(Profit)/sum(Sales))
+
+cate_Furniture<- cate[1,2]
+cate_Office<-cate[2,2]
+cate_Tech<-cate[3,2]
+
+cate_Furniture<-round(cate_Furniture,2)
+
+
+valueBox(cate_Furniture,icon = "fa-random",color="red")
+
+
+```
+
+### Category <font size='4'> "Profit ratio Sales of Office Cateogry" </font>
+
+```{r, echo=FALSE,fig.width=0.8}
+
+cate_Office<-round(cate_Office,2)
+
+
+valueBox(cate_Office,icon="fa-thumbs-down",color="green")
+
+
+```
+
+
+### Category <font size='4'> "Profit ratio Sales of Tech Cateogry" </font>
+
+```{r, echo=FALSE,fig.width=0.8}
+
+cate_Tech<-round(cate_Tech,2)
+
+valueBox(cate_Tech,icon="fa-comments",color="black")
+
+```
+
+### Correlation variables
+
+```{r, echo=FALSE, fig.height=7,fig.width=7}
+
+df<- dt%>%select(Sales,Profit,leadtime,Shipping.Cost)%>%mutate(leadtime=as.numeric(leadtime))
+
+
+
+
+gg <-
+               df %>% ggplot(aes(y = Sales)) + geom_point(aes(x = Profit, color = "Profit")) +
+               geom_point(aes(x = leadtime, color = "Leadtime")) + geom_point(aes(x = Shipping.Cost, color =
+                       "Shipping.Cost")) + theme_light() + scale_x_continuous(breaks = 500 * c(-8:16), labels = comma) +
+               expand_limits(x = -1000) + xlab("Profit,Shipping.Cost,Leadtime") + geom_abline(intercept =
+                                                                                                             -47.8)
+
+
+boot_df<-bootstraps(df,time=30,apparent=TRUE)
+
+boot_model<- boot_df%>%mutate(model=map(splits,~lm(Sales~Profit+Shipping.Cost+leadtime,data=.)))
+
+
+boot_model<-boot_model%>%mutate(coef_info=map(model,tidy))
+
+conf_interval<- int_pctl(boot_model,coef_info)
+
+model_aug<- boot_model%>%sample_n(10)%>%mutate(augmt=map(model,augment))%>%unnest(augmt)
+
+gg1 <-
+               model_aug %>% ggplot(aes(y = Sales)) + geom_point(aes(x = Profit, color =
+                                                                                    "Profit")) + geom_point(aes(x = leadtime, color = "Leadtime")) + geom_point(aes(x =
+                                                                                                                                                                                   Shipping.Cost, color = "Shipping.Cost")) + theme_light() + scale_x_continuous(breaks =
+                            2000 * c(-2:5), labels = comma) + expand_limits(x = -1000) + xlab("Ten possibilities of model") +
+               geom_abline(intercept = -47.8) + geom_line(aes(
+                              x = Profit,
+                              y = .fitted,
+                              group = id,
+                              alpha = 0.2,
+                              color = id
+               ))
+
+m<-corrplot(cor(df), type="upper", order="hclust",
+         col=brewer.pal(n=8, name="Set2"))
+
+m
+```
+
+Column {data-height=700} {.tabset .tabset-fade .tabset-pills}
+-------------------------------------------------------------
+
+### Sales and Profit of each SubCategory
+
+```{r,echo=FALSE, fig.height=7,fig.width=7}
+
+df <-
+               dt %>% group_by(Sub.Category) %>% summarise(
+                              Sales = sum(Sales),
+                              Profit = sum(Profit),
+                              Shipping.Cost = sum(Shipping.Cost)
+               ) %>% mutate(Sub.Category = fct_reorder2(Sub.Category, desc(Sales), desc(Profit))) %>%
+               gather(key = "var", value = "value", 2:4)
+
+gg <-
+               df %>% ggplot(aes(
+                              x = Sub.Category,
+                              y = value,
+                              fill = var,
+                              color = "white"
+               )) + geom_bar(stat = "identity",
+                             position = "dodge",
+                             alpha = 0.6) + scale_fill_manual(values = c("darkred", "yellow", "palegreen")) +
+               coord_flip() + scale_y_continuous(breaks = 5e4 * c(1:6), labels = comma) +
+               theme(
+                              legend.title = element_blank(),
+                              axis.text.x = element_text(angle = 45),
+                              axis.text.y = element_text(angle = 90)
+               ) + theme_light() + labs("Subcategory portfolio") + xlab("Value of each SubCategory") +
+               ylab("Sub Category")
+
+ggplotly(gg)
+
+```
+
+
+### Bootstraps and 10 potential models (Shipping.Cost, Profit,Sales, leadtime)
+
+```{r, echo=FALSE, fig.height=12,fig.width=12}
+
+gg1
+
+```
+
+
+ 
+Text_Mining_Product
+============================================================================
+
+
+Column {.tabset .tabset-fade .tabset-pills}
+---------------------------------------------------------------------
+
+
+### Total of 3 Categories 
+
+```{r}
+
+df<-dt%>%select(-c(Row.ID,Order.ID,Customer.ID,Customer.Name,Postal.Code,Product.ID,Order.Priority,Quantity))
+
+df1<-df%>%transmute(Product.Name=as.character(Product.Name))%>%unnest_tokens(word,Product.Name)%>%group_by(word)%>%count(sort=TRUE)%>%filter(!word %in% stop_words, !str_detect(word,pattern="[:digit:]"),!word %in% c("x","for","and","drive","cover","by","in","at","d","on","w","ii","or","r","no","yes","h","c","i","t","with"))%>%filter(n>50)
+
+
+
+df1%>%with(wordcloud(words=word,freq = n,colors = c(brewer.pal(8,"Paired"))))
+
+
+
+
+
+```
+
+### Furniture
+
+```{r}
+
+df1<-dt%>%filter(Category=="Furniture")%>%transmute(Product.Name=as.character(Product.Name))%>%unnest_tokens(word,Product.Name)%>%group_by(word)%>%count(sort=TRUE)%>%filter(!word %in% stop_words, !str_detect(word,pattern="[:digit:]"),!word %in% c("x","for","and","drive","cover","by","in","at","d","on","w","ii","or","r","no","yes","h","c","i","t","with"))%>%filter(n>10)
+
+df1%>%with(wordcloud(words=word,freq = n,colors = c(brewer.pal(8,"Set1"))))
+
+
+```
+
+
+### Technology
+
+```{r}
+
+df1<-dt%>%filter(Category=="Technology")%>%transmute(Product.Name=as.character(Product.Name))%>%unnest_tokens(word,Product.Name)%>%group_by(word)%>%count(sort=TRUE)%>%filter(!word %in% stop_words, !str_detect(word,pattern="[:digit:]"),!word %in% c("x","for","and","drive","cover","by","in","at","d","on","w","ii","or","r","no","yes","h","c","i","t","with"))%>%filter(n>10)
+
+df1%>%with(wordcloud(words=word,freq = n,colors = c(brewer.pal(8,"Set2"))))
+
+
+```
+
+
+
+### Office Supplies
+
+```{r}
+
+df1<-dt%>%filter(Category=="Office Supplies")%>%transmute(Product.Name=as.character(Product.Name))%>%unnest_tokens(word,Product.Name)%>%group_by(word)%>%count(sort=TRUE)%>%filter(!word %in% stop_words, !str_detect(word,pattern="[:digit:]"),!word %in% c("x","for","and","drive","cover","by","in","at","d","on","w","ii","or","r","no","yes","h","c","i","t","with"))%>%filter(n>20)
+
+df1%>%with(wordcloud(words=word,freq = n,colors = c(brewer.pal(8,"Set2"))))
+
+
+```
+
+
+
+
+
+Clustering
+============================================================================
+
+
+
+Column {.tabset .tabset-fade .tabset-pills}
+--------------------------------------------------------------------------
+
+
+### Visualize cluster
+
+```{r}
+
+set.seed(12345)
+
+df<- dt%>%select(c(Sales, Profit, Shipping.Cost, leadtime))
+df$leadtime<-as.numeric(df$leadtime)
+rownames(df)<-NULL
+
+kclust<- tibble(k=1:9)%>%mutate(kclust=map(k,~kmeans(df,.)),glanced=map(kclust,glance),tidied=map(kclust,tidy),augmented=map(kclust,augment,df))
+
+glanced<- kclust%>%unnest(glanced)
+tidied<- kclust%>%unnest(tidied)%>%mutate(Sales=x1,Profit=x2,Shipping.Cost=x3,leadtime=x4)
+augmented<-kclust%>%unnest(augmented)
+
+
+glanced%>%ggplot(aes(x=k))+geom_line(aes(group=1,y=tot.withinss))+geom_point(aes(y=tot.withinss))+geom_line(aes(group=1,y=betweenss,color="red"))+geom_point(aes(y=betweenss,color="red"))+scale_x_continuous(breaks = c(1:9))+theme_light()
+
+p1<-augmented%>%ggplot(aes(x=Profit,y=Shipping.Cost))+geom_point(aes(color=.cluster))+facet_wrap(~k)
+
+p1+geom_point(data=tidied,aes(shape="M",size=10))
+
+
+
+
+```
+
+
+### ggpair plot
+
+```{r}
+
+
+
+ggpairs(augmented[,5:9],columns=1:4, aes(colour=.cluster, alpha=0.5),
+        lower=list(continuous="points"),
+        upper=list(continuous="blank"),
+        axisLabels="none", switch="both") +
+        theme_bw()
+```  
+
+
+### Summary
+
+```{r}
+
+
+df<- tidied %>%filter(k==6)%>%select(Sales,Profit,Shipping.Cost,leadtime,k)
+df$k<- c(1:6)
+
+labs<-c("Sales","Profit","Shipping.Cost","Leadtime")
+scores<-list(k1=c(73.1, 9.56,8.17,3.97 ),k2=c(614,46.3,68.2,3.93),k3=c(3953, 1022,349,3.84),k4=c(4112,-2905, 362, 4.1),k5=c(1655,252,188,3.82),k5=c(1655,252,188.,3.82),k6=c( 12559 ,4112,277,4))
+
+
+chartJSRadar(scores,labs = labs,width=1000,height=1000,main="The brief 4 variables for each Group, Profit_Group1 is negative",showToolTipLabel = TRUE,showLegend = TRUE,maxScale = 14,responsive = TRUE,polyAlpha = 0.1)
+
+
+```
