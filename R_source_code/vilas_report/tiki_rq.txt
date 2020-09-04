@@ -1,0 +1,76 @@
+Experience with delivering accurate and insightful business reporting and applying critical thinking to data to problem solve and drive business performance.
+Experience with using SQL queries for data extraction and manipulation.
+Willingness to learn new thing (R, Python) and solving problem using cutting edge technology (BigQuery).
+Has a passion for e-commerce.
+Be result-driven, precise, detail oriented, able to work under pressure and under tight timelines.
+A minimum 2 years experience with Python is required.
+Ability to deep dive & analyze problems and propose an end to end solutions.
+Working knowledge of message queue, streaming process, and scalable data stores is a plus
+Experienced with data pipeline and workflow management, also big data tools: Azkaban, Luigi, Airflow, Hadoop, Spark, Kafka is a big plus.
+Excellent understanding of machine learning techniques and algorithms, such as k-NN, Naive Bayes, SVM, Decision Trees 
+Excellent knowledge of Python and its math and data science libraries such as scikit, xgboost, pandas, etc 
+Knowledge of C++ and/or Java is a plus 
+Knowledge of statistics is a plus 
+Knowledge of SQL is a plus 
+Experience with cloud services is a plus 
+Excellent communication skills (fluency in English language is a plus)
+Excellent problem-solving skills and Data driven mind-set
+Comfortable with handling ambiguity and willingness to keep learning
+Deep customer focus
+Strong sense of ownership
+Excellent understanding of machine learning techniques and algorithms, such as k-NN, Naive Bayes, SVM, Decision Trees
+Excellent knowledge of Python and its math and data science libraries such as scikit, xgboost, pandas, etc
+Knowledge of C++ and/or Java is a plus
+Knowledge of statistics is a plus
+Knowledge of SQL is a plus
+Experience with cloud services is a plus
+Bachelor’s degree in Accounting, Finance or related fields.
+4~5 years of related experience.
+Highly analytical and ability to analyse large data sets to extract actionable insights in order to provide creative recommendations to management and business partners
+Highly proficiency in Excel and SQL is a must, knowledge of Python or R is a plus
+Highly curious, logical, self-motivated, independent, proactive, and result oriented
+Ability to work cross-functionally, to thrive in a dynamic and fast-paced environment, and to manage and prioritize multiple projects with tight deadlines
+Demonstrate strong leadership skill, with exceptional interpersonal and communication skills (both written and verbal) to influence other leaders in Finance and the business.
+Fluent in English.
+Good negotiation, excellent in written, communication and presentation skills
+Strong admin and organizational skills
+Bachelor Degree is required
+Minimum 2-year experience in finance industry
+Desired skill-sets include MS Excel
+Experience with delivering accurate and insightful business reporting and applying critical thinking to data to problem solve and drive business performance.
+Experience with using SQL queries for data extraction and manipulation is a plus
+Has a passion for e-commerce.
+Be result-driven, precise, detail oriented, able to work under pressure and under tight timelines.
+1-3 years of related work experience
+Online e-commerce experience is a plus
+Strong Microsoft Office skills [Excel, Word, Power Point]
+Strong communication skills (oral and written) in English.
+Excellent problem-solving skills, critical thinking and analytical skills
+Interest in setting up and improving processes
+Demonstrated ability to translate customer needs into business and product requirements
+Able to prioritize complex deliverable.
+Detail-oriented and strong follow-through
+Enthusiasm for e-commerce and platform operations and its opportunities
+University graduate with relevant bachelor/Master degree (Operations
+Background)
+Preferably 3-8+ year of proven career track in Platform Operations and Supply
+Chain Management, consulting, e-commerce.
+Data driven leadership
+Outstanding communication and interpersonal skills. Superior verbal and written
+communications.
+Proven ability to manage multiple, competing priorities simultaneously.
+High attention to detail including precise and effective customer communications
+Demonstrated results
+BASIC QUALIFICATIONS
+Bachelor's degree
+6+ years of experience in sales or account management
+PREFERRED QUALIFICATIONS
+Experience in a highly analytical, results-oriented environment with external customer interaction.
+Proven analytical skills and demonstrated ability to manage the business “by the numbers”. Must be metrics-driven.
+Excellent written and oral communication and presentation skills and the ability to express thoughts logically and succinctly. Demonstrated active listening skills, highly consultative and solutions-oriented.
+Deep understanding of and passion for eCommerce desired
+Experience with e-commerce, retail, advertising, or media would be an advantage
+Prior experience influencing C-level executives is highly desirable.
+Entrepreneurial drive and demonstrated ability to achieve stretch goals in an innovative and fast-paced environment.
+MBA preferred.
+

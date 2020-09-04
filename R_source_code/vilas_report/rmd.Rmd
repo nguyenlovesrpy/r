@@ -1,0 +1,935 @@
+---
+title: "Analytics Job in Ecommerce"
+author: "Nguyen and Linh RnD"
+date: "May 06 2020"
+output: 
+               html_document:
+               toc: true 
+               toc_float: true
+               number_sections: true  
+               theme: united  
+               highlight: tango  
+               css: my.css   
+---
+
+
+
+
+```{r, include=FALSE, warning=FALSE,message=FALSE}
+
+setwd("C:/Users/DellPC/Desktop/R_source_code/vilas_report")
+
+suppressMessages(library(tidyverse))
+suppressMessages(library(scales))
+suppressMessages(library(ggraph))
+suppressMessages(library(igraph))
+suppressMessages(library(tidyr))
+suppressMessages(library(tidytext))
+suppressMessages(library(DT))
+suppressMessages(library(wordcloud))
+suppressMessages(library(wordcloud2))
+suppressMessages(library(plotly))
+suppressMessages(library(reshape2))
+suppressMessages(library(ggthemes))
+suppressMessages(library(widyr))
+suppressMessages(library(topicmodels))
+suppressMessages(library(TOC))
+
+
+tiki_jd <- read.delim("tiki_jd.txt",header = FALSE)
+shopee_jd <- read.delim("shopee_jd.txt",header = FALSE)
+lazada_jd <- read.delim("lazada_jd.txt",header = FALSE)
+
+
+
+tiki_rq <- read.delim("tiki_rq.txt",header = FALSE)
+shopee_rq <- read.delim("shopee_rq.txt",header = FALSE)
+lazada_rq<- read.delim("lazada_rq.txt",header = FALSE)
+
+
+stop<-data.frame(stop=c("of to a and as of in to an in are is am this that there those out  at must S also with  so but  then can even date  for you  our be  more happiness the on a â  bring youâ you'll works teams we"))%>%mutate(stop=as.character(stop))
+stop_w<- stop%>%unnest_tokens(word,stop)
+stop_j<-c("have","will","your","campaigns","by","she","what","or","plus","into")
+
+```
+
+
+
+
+```{r, include=FALSE, warning=FALSE,message=FALSE}
+
+txt1<- tiki_jd %>%transmute(V1=str_to_lower(V1))
+
+txt1_V1<- txt1%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+
+
+
+```
+
+<hr>
+
+
+# Table of contents:
+
+ <font size ="7"> I. Introduction </font> <br>
+ <font size ="7"> II. Job Description </font> <br>
+ <font size ="6"> 2.1 Tiki </font> <br>
+ <font size ="6"> 2.2 Shopee </font> <br>
+ <font size ="6"> 2.3 Lazada </font> <br>
+ <font size ="7"> III. Job Requirement </font> <br>
+ <font size ="6"> 3.1 Tiki </font> <br>
+ <font size ="6"> 3.2 Shopee </font> <br>
+ <font size ="6"> 3.3 Lazada </font> <br>
+ <font size ="7"> IV. Summary for 3 companies </font> 
+
+
+<hr>
+
+
+# Preface
+
+<font size="8"> R&D Research </font>
+
+<hr>
+
+-  Business consumers in the digital age have become increasingly informed, challenging industrial marketing and sales teams to adapt their traditional marketing strategies to fully embrace buyers' preferences and expectations. Technologies such as artificial intelligence (AI) and big data analytics have created unprecedented opportunities for companies to exploit their data assets for business-to-business (B2B) market initiatives. 
+
+- Data also plays a key role in making different decisions about business supply chains and logistics operations that are closely related to the industrial marketing field. Supply chain management deals with creating and maintaining linkages between different entities with specific responsibilities, ranging from raw material procurement to end user-product interactions. All of this underlines the importance of big data as a crucial factor in global marketing operations (Miguel & Casado 2016).
+
+- The advent of the big-data era has further strengthened the relationship between logistics distribution and e-commerce, and this presents new opportunities, such as the expansion of enterprise information, the sharing of distribution channels, and the integration of data resources. Particularly, e-commerce enterprises can accurately predict the future needs of customers and can fulfill personalized services to customers
+In e-commerce, the success of hybrid online platforms is well documented where the platform not only works as a retailer but also offers online marketplace services to sellers. Logistics service is one of the most expensive operations for e-commerce and plays a critical role in promoting online purchases.
+Employing a large and diverse range of data in logistics and supply chain management, companies can understand the needs and preferences of their customers. Electronic commerce (e-commerce) giants such as Amazon, Flipkart, and Snapdeal have been collecting and exploring data from customers, orders, inventory, and other information (Meena, 2017). The success of e-commerce companies now depends largely upon how efficiently they capture, store, and use data.
+
+- With the rapid development of mobile technology, online retailing has increased significantly in recent years. In China, the online shopping market had grown to an amazing RMB  4.08 trillion in the first half of 2018, which represented 22.7% of the total retail market. Among the online retailing market (i.e., the e-commerce market), the well-documented business mode is the hybrid online platform (e.g., Amazon.cn, JD.com, and Suning.com), where the platform not only acts as a retailer but also provides marketplace services to third-party sellers (Qin, X., Liu, Z., & Tian, L. (2019)).
+
+
+- Vietnam’s case represents a developmental model, and legal, technical, and industrial assistance from the advanced economies or the intergovernmental organizations had a significant impact on (initial) domestic lawmaking. Vietnam has been active in adopting e-transactions laws and updating them with a series of decrees.
+   
+- At the end of 2019, the "four giants – big 4" of Vietnam's e-commerce market were identified as Shopee, Lazada, Tiki and Sendo. The market size reaches 5 billion USD, the growth rate is 81% - the 2nd fastest in Southeast Asia. With a population of more than 97 million people and a growing number of smartphone users, Vietnam is considered an attractive market for e-commerce companies.
+   
+- According to Vietnam E-commerce Association (VECOM)'s 2019 E-commerce index report, the market size in 2018 stood at US $ 7.8 billion. This market includes online retail, online travel, online marketing, online entertainment and online buying and selling of other digital products and services.
+If the growth rate of 2019 and 2020 continues at 30%, by 2020, the market size will reach 13 billion USD.
+
+   ![tiki_jd](C:/Users/DellPC/Desktop/R_source_code/vilas_report/fig1.jpg)
+ 
+               Figure 1: Top 10 most used e-commerce applications in Vietnam
+
+<hr>
+
+- It seems that the demand for online shopping of Vietnamese people is increasing rapidly, so their sophistication and expectation will also increase. More and more people are looking for specific products, brands, or services to cater to their growing unique needs. It was then that people came and go like H&M or Leflair.
+
+- This brings many opportunities for small and medium enterprises in Vietnam as well as e-commerce businesses to make great efforts in 2020 and beyond, it creates opportunities for big companies to create the differentiation and new competitive advantage.
+
+- By using a big data statistical analysis of consumer demand and by integrating a high-quality distribution path of consumers, putting a supplier's products into the nearest distribution center will help to implement the intelligent distribution, as well as to improve the efficiency and quality of distribution and to reduce the logistics cost and delivery time (Sun, 2015).
+   
+ <hr>
+
+   ![tiki_jd](C:/Users/DellPC/Desktop/R_source_code/vilas_report/fig2.jpg)
+ 
+   
+ 
+
+
+               Figure 2: Website visits count of Vietnam’s top E-commerce site (2018-2019)
+ 
+ 
+ 
+   ![tiki_jd](C:/Users/DellPC/Desktop/R_source_code/vilas_report/fig3.jpg) 
+ 
+               Figure 3: Website visits count, highest monthly active users and most downloaded applications of Vietnam’s top E-commerce site (2019)
+               
+   
+<hr>
+
+- According to forecasts by data and analytics firm GlobalData, Vietnam's e-commerce market is forecast to reach US $ 17.3 billion by 2023, up sharply from US $ 9.4 billion in 2019.
+  
+**Resource**
+
+- Miguel, J. C., & Casado, M.Á. (2016). GAFanomy (Google, Amazon, Facebook and Apple): The big four and the b-ecosystem.
+- Dynamics of big internet industry groups and future trends (pp. 127–148). Cham: Springer
+Meena, S. (2017).
+- Amazon and flipkart are expected to record $1.2 billion to $1.5 billion in sales in India's coming festive season. Forrester.
+Qin, X., Liu, Z., & Tian, L. (2019). 
+- The Strategic Analysis of Logistics Service Sharing in an E-commerce Platform. Omega, 102153. Zheng, K., Zhang, Z., & Song, B. (2019). 
+- E-commerce logistics distribution mode in big-data context: A case analysis of JD.COM. Industrial Marketing Management.
+Sun, X. (2015). 
+- E-commerce logistics distribution mode analysis and decision. Applied Mechanics and Materials. Vol. 744. Applied Mechanics and Materials (pp. 1873–1877). Trans Tech Publications
+
+
+
+
+
+
+
+# Job Description{.tabset .tabset-faded .tabset-pills}
+
+## Tiki{.tabset .tabset-faded .tabset-pills}
+
+### Bar graph 1-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+
+gg <-
+               txt1_V2 %>% group_by(word) %>% count(sort = TRUE) %>% anti_join(stop_words) %>%
+               head(30) %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "darkorchid",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of Tiki business model") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+```
+
+
+
+### Wordcloud
+
+```{r,include=FALSE, warning=FALSE, message=FALSE,fig.align="center"}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)%>% group_by(word) %>% count(sort = TRUE)%>%filter(!word %in% stop_w$word)
+
+
+graph<-wordcloud2(txt1_V2, size = 1, minSize = 0, gridSize =  0,
+           fontFamily = 'Segoe UI', fontWeight = 'bold',
+           color = 'random-dark', backgroundColor = "lightblue",
+           minRotation = -pi/4, maxRotation = pi/4, shuffle = TRUE,
+           rotateRatio = 0.8, shape = 'triangle', ellipticity = 0.65,
+           widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
+
+```
+
+
+![tiki_jd](C:/Users/DellPC/Desktop/R_source_code/vilas_report/tiki_jd.jpg)
+
+In Tiki, Most of indeed skills are Data, Business, Risk Management, Reporting, Product, Optimization, Insights,...
+
+### Bar graph 2-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>% unite(bigram,word1,word2,sep=" ")%>%count(bigram,sort=TRUE)%>%filter(n>0)
+
+
+gg <-
+               txt1_V2 %>% group_by(bigram) %>%head(30) %>% ggplot(aes(x = reorder(str_to_title(bigram), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "palegreen",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of Tiki business model") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+
+````
+
+Machine Learning, Retail, Solve Complex, Seller Operations, Learning Models, Flawless Execution, Data Drive, Data Scientist, Customer Selection
+
+### Sentiment
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=8,fig.height=8}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+AFINN<- get_sentiments("bing")
+
+not_words<- txt1_V2%>%  inner_join(AFINN,by="word")%>% count(word,sentiment,sort=TRUE)
+               
+
+
+gg <-
+               not_words %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n,fill=sentiment,label=n)) + geom_bar(
+                              stat = "identity",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of Tiki business model") +geom_label(aes(fill="white"))+
+               xlab("Frequency") + ylab("General Activity")+facet_wrap(~sentiment,scales="free")+theme(legend.position = "none")
+
+
+gg
+
+```
+
+Focus on detecting fraud and error in tiki operation activities
+
+
+```{r, include=FALSE, warning=FALSE,message=FALSE}
+txt1<- shopee_jd %>%transmute(V1=str_to_lower(V1))
+
+txt1_V1<- txt1%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+
+
+
+```
+
+
+
+## Shopee{.tabset .tabset-faded .tabset-pills}
+
+
+### Bar graph 1-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+txt1<- shopee_jd %>%transmute(V1=str_to_lower(V1))
+
+txt1_V1<- txt1%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+
+gg <-
+               txt1_V2 %>% group_by(word) %>% count(sort = TRUE) %>% anti_join(stop_words) %>%
+               head(30) %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "darkorchid",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of shopee business model") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+```
+
+
+
+### Wordcloud
+
+```{r,include=FALSE, warning=FALSE, message=FALSE,fig.align="center"}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)%>% group_by(word) %>% count(sort = TRUE)%>%filter(!word %in% stop_w$word)
+
+
+graph<-wordcloud2(txt1_V2, size = 1, minSize = 0, gridSize =  0,
+           fontFamily = 'Segoe UI', fontWeight = 'bold',
+           color = 'random-dark', backgroundColor = "lightblue",
+           minRotation = -pi/4, maxRotation = pi/4, shuffle = TRUE,
+           rotateRatio = 0.8, shape = 'triangle', ellipticity = 0.65,
+           widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
+
+```
+
+
+![tiki_jd](C:/Users/DellPC/Desktop/R_source_code/vilas_report/shopee_jd.jpg)
+
+
+
+Business, Test, Seleers, Plan, Network, Data, Campaign, Marketing, Insights, Experience
+
+### Bar graph 2-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>% unite(bigram,word1,word2,sep=" ")%>%count(bigram,sort=TRUE)%>%filter(n>0)
+
+
+gg <-
+               txt1_V2 %>% group_by(bigram) %>%head(30) %>% ggplot(aes(x = reorder(str_to_title(bigram), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "palegreen",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of shopee business model") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+
+````
+
+Google Cloud, Business Development, Business Processes, Business Metrics, Business Lead, Bugs Web, Brand Awareness, Automate Test, Agile Development, Actionable Insights
+
+### Sentiment
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=8,fig.height=8}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+AFINN<- get_sentiments("bing")
+
+not_words<- txt1_V2%>%  inner_join(AFINN,by="word")%>% count(word,sentiment,sort=TRUE)
+               
+
+
+gg <-
+               not_words %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n,fill=sentiment,label=n)) + geom_bar(
+                              stat = "identity",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of shopee business model") +geom_label(aes(fill="white"))+
+               xlab("Frequency") + ylab("General Activity")+facet_wrap(~sentiment,scales="free")+theme(legend.position = "none")
+
+
+gg
+
+```
+
+Issues, Error, Bugs, Isolations,
+
+```{r, include=FALSE, warning=FALSE,message=FALSE}
+txt1<- lazada_jd %>%transmute(V1=str_to_lower(V1))
+
+txt1_V1<- txt1%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+
+
+
+```
+
+
+
+## Lazada{.tabset .tabset-faded .tabset-pills}
+
+### Bar graph 1-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+txt1<- lazada_jd %>%transmute(V1=str_to_lower(V1))
+
+txt1_V1<- txt1%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+
+gg <-
+               txt1_V2 %>% group_by(word) %>% count(sort = TRUE) %>% anti_join(stop_words) %>%
+               head(30) %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "darkorchid",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of lazada business model") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+```
+
+
+
+### Wordcloud
+
+```{r,include=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)%>% group_by(word) %>% count(sort = TRUE)%>%filter(!word %in% stop_w$word)
+
+
+graph<-wordcloud2(txt1_V2, size = 1, minSize = 0, gridSize =  0,
+           fontFamily = 'Segoe UI', fontWeight = 'bold',
+           color = 'random-dark', backgroundColor = "lightblue",
+           minRotation = -pi/4, maxRotation = pi/4, shuffle = TRUE,
+           rotateRatio = 0.8, shape = 'triangle', ellipticity = 0.65,
+           widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
+
+```
+
+
+![tiki_jd](C:/Users/DellPC/Desktop/R_source_code/vilas_report/lazada_jd.jpg)
+
+Business, Team, Category, Data, Marketing, Campaign, Product,Onsite, ANalysis, Testing, Analytics
+
+### Bar graph 2-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>% unite(bigram,word1,word2,sep=" ")%>%count(bigram,sort=TRUE)%>%filter(n>0)
+
+
+gg <-
+               txt1_V2 %>% group_by(bigram) %>%head(30) %>% ggplot(aes(x = reorder(str_to_title(bigram), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "palegreen",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of lazada business model") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+
+````
+
+Guided Shopping, Onsite Performance, Integrate Marketing, Goal Achievement, Intelligent Team, Data Analysis, Analytics Bestseller, Analytics Business
+### Sentiment
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=8,fig.height=8}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+AFINN<- get_sentiments("bing")
+
+not_words<- txt1_V2%>%  inner_join(AFINN,by="word")%>% count(word,sentiment,sort=TRUE)
+               
+
+
+gg <-
+               not_words %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n,fill=sentiment,label=n)) + geom_bar(
+                              stat = "identity",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of lazada business model") +geom_label(aes(fill="white"))+
+               xlab("Frequency") + ylab("General Activity")+facet_wrap(~sentiment,scales="free")+theme(legend.position = "none")
+
+
+gg
+
+```
+
+Bug, Issues, Error and Isolate
+
+
+# Job Requirement{.tabset .tabset-faded .tabset-pills}
+
+## Tiki{.tabset .tabset-faded .tabset-pills}
+
+### Bar graph 1-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+txt1<- tiki_rq%>%transmute(V1=str_to_lower(V1))
+
+txt1_V1<- txt1%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+
+gg <-
+               txt1_V2 %>% group_by(word) %>% count(sort = TRUE) %>% anti_join(stop_words) %>%
+               head(30) %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "darkorchid",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of Tiki Job Requirement") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+```
+
+
+
+### Wordcloud
+
+```{r,include=FALSE, warning=FALSE, message=FALSE,fig.align="center"}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)%>% group_by(word) %>% count(sort = TRUE)%>%filter(!word %in% stop_w$word)
+
+
+graph<-wordcloud2(txt1_V2, size = 1, minSize = 0, gridSize =  0,
+           fontFamily = 'Segoe UI', fontWeight = 'bold',
+           color = 'random-dark', backgroundColor = "lightblue",
+           minRotation = -pi/4, maxRotation = pi/4, shuffle = TRUE,
+           rotateRatio = 0.8, shape = 'triangle', ellipticity = 0.65,
+           widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
+
+```
+
+
+![tiki_jd](C:/Users/DellPC/Desktop/R_source_code/vilas_report/tiki_rq.jpg)
+
+Experience, Skills, Business, Ecommerce, Writeen, SQL, Python, Demonstrated, Customer, Analytical, Finance, Excel English
+
+### Bar graph 2-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>% unite(bigram,word1,word2,sep=" ")%>%count(bigram,sort=TRUE)%>%filter(n>0)
+
+
+gg <-
+               txt1_V2 %>% group_by(bigram) %>%head(30) %>% ggplot(aes(x = reorder(str_to_title(bigram), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "palegreen",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of Tiki business model") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+
+````
+
+Demonstrated Ability, Critical Thinking, Communication Skills, Naive Bayes, Machine Learning, Insightful Business, Excellent Understanding, Excellent ProblemSolving, Excellent Knowledge, Decision Trees, Data Science, Data Extraction, Cloud Service
+
+### Sentiment
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=8,fig.height=8}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+AFINN<- get_sentiments("bing")
+
+not_words<- txt1_V2%>%  inner_join(AFINN,by="word")%>% count(word,sentiment,sort=TRUE)
+               
+
+
+gg <-
+               not_words %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n,fill=sentiment,label=n)) + geom_bar(
+                              stat = "identity",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of Tiki business model") +geom_label(aes(fill="white"))+
+               xlab("Frequency") + ylab("General Activity")+facet_wrap(~sentiment,scales="free")+theme(legend.position = "none")
+
+
+gg
+
+```
+
+Complex, Ambiguity
+
+## Shopee{.tabset .tabset-faded .tabset-pills}
+
+### Bar graph 1-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+txt1<- shopee_rq%>%transmute(V1=str_to_lower(V1))
+
+txt1_V1<- txt1%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+
+gg <-
+               txt1_V2 %>% group_by(word) %>% count(sort = TRUE) %>% anti_join(stop_words) %>%
+               head(30) %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "darkorchid",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of shopee business model") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+```
+
+
+
+### Wordcloud
+
+```{r,include=FALSE, warning=FALSE, message=FALSE,fig.align="center"}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)%>% group_by(word) %>% count(sort = TRUE)%>%filter(!word %in% stop_w$word)
+
+
+graph<-wordcloud2(txt1_V2, size = 1, minSize = 0, gridSize =  0,
+           fontFamily = 'Segoe UI', fontWeight = 'bold',
+           color = 'random-dark', backgroundColor = "lightblue",
+           minRotation = -pi/4, maxRotation = pi/4, shuffle = TRUE,
+           rotateRatio = 0.8, shape = 'triangle', ellipticity = 0.65,
+           widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
+
+```
+
+
+![tiki_jd](C:/Users/DellPC/Desktop/R_source_code/vilas_report/shopee_rq.jpg)
+
+Experience, Strong, Skills, Test, Network, Data, Analytical, Technology, Solving, Excel, Business
+
+
+### Bar graph 2-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>% unite(bigram,word1,word2,sep=" ")%>%count(bigram,sort=TRUE)%>%filter(n>0)
+
+
+gg <-
+               txt1_V2 %>% group_by(bigram) %>%head(30) %>% ggplot(aes(x = reorder(str_to_title(bigram), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "palegreen",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of shopee business model") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+
+````
+
+Google cloud, Verbal Communication, Strong Analytical, Communication Skills, Cloud Platform, Appliance Cisco.
+
+
+### Sentiment
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=8,fig.height=8}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+AFINN<- get_sentiments("bing")
+
+not_words<- txt1_V2%>%  inner_join(AFINN,by="word")%>% count(word,sentiment,sort=TRUE)
+               
+
+
+gg <-
+               not_words %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n,fill=sentiment,label=n)) + geom_bar(
+                              stat = "identity",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of shopee business model") +geom_label(aes(fill="white"))+
+               xlab("Frequency") + ylab("General Activity")+facet_wrap(~sentiment,scales="free")+theme(legend.position = "none")
+
+
+gg
+
+```
+
+Ambigous, Critical, Hardship, Puppet, Suffer
+
+```{r, include=FALSE, warning=FALSE,message=FALSE}
+txt1<- lazada_jd %>%transmute(V1=str_to_lower(V1))
+
+txt1_V1<- txt1%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+
+
+
+```
+
+
+
+## Lazada{.tabset .tabset-faded .tabset-pills}
+
+### Bar graph 1-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+txt1<- lazada_rq%>%transmute(V1=str_to_lower(V1))
+
+txt1_V1<- txt1%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+
+gg <-
+               txt1_V2 %>% group_by(word) %>% count(sort = TRUE) %>% anti_join(stop_words) %>%
+               head(30) %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "darkorchid",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of lazada business model") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+```
+
+
+
+
+### Wordcloud
+
+```{r,include=FALSE, warning=FALSE, message=FALSE,fig.align="center"}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)%>% group_by(word) %>% count(sort = TRUE)%>%filter(!word %in% stop_w$word)
+
+
+graph<-wordcloud2(txt1_V2, size = 1, minSize = 0, gridSize =  0,
+           fontFamily = 'Segoe UI', fontWeight = 'bold',
+           color = 'random-dark', backgroundColor = "lightblue",
+           minRotation = -pi/4, maxRotation = pi/4, shuffle = TRUE,
+           rotateRatio = 0.8, shape = 'triangle', ellipticity = 0.65,
+           widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
+
+```
+
+
+![tiki_jd](C:/Users/DellPC/Desktop/R_source_code/vilas_report/lazada_rq.jpg)
+
+
+Experience, Ability, Skills, Strong, Business, Communication, Data, Verbal, Retails, Commerce, Administration
+
+### Bar graph 2-word
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>% unite(bigram,word1,word2,sep=" ")%>%count(bigram,sort=TRUE)%>%filter(n>0)
+
+
+gg <-
+               txt1_V2 %>% group_by(bigram) %>%head(30) %>% ggplot(aes(x = reorder(str_to_title(bigram), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "palegreen",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of lazada business model") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+
+````
+
+Demonstrated Ability
+
+### Sentiment
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=8,fig.height=8}
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1)
+AFINN<- get_sentiments("bing")
+
+not_words<- txt1_V2%>%  inner_join(AFINN,by="word")%>% count(word,sentiment,sort=TRUE)
+               
+
+
+gg <-
+               not_words %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n,fill=sentiment,label=n)) + geom_bar(
+                              stat = "identity",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Top word of lazada business model") +geom_label(aes(fill="white"))+
+               xlab("Frequency") + ylab("General Activity")+facet_wrap(~sentiment,scales="free")+theme(legend.position = "none")
+
+
+gg
+
+```
+
+Problem, Issues
+
+# Summarize 3 companies {.tabset .tabset-faded .tabset-pills}
+
+## Job Description {.tabset .tabset-faded .tabset-pills}
+
+### JD_Network
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=14,fig.height=10}
+
+txt2<- bind_rows(tiki_jd,shopee_jd,lazada_jd)%>%transmute(V1=str_to_lower(V1))
+
+txt1_V2<- txt2%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+
+bigram1_graph<-txt1_V2%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>%count(word1,word2,sort=TRUE)%>%filter(n>1)%>%graph_from_data_frame()
+
+a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+
+ggraph(bigram1_graph, layout = "fr") + geom_edge_link(
+               aes(edge_alpha = n*100,edge_width=n*3),edge_colour="cyan4") + geom_node_point(color = "black", size=5) + geom_node_text(aes(label = name),repel=TRUE,point.padding=unit(0.2,"lines"), vjust = 1, hjust = 1) +theme_void()+theme(axis.ticks = element_blank(),
+        axis.text.y=element_blank(),
+        axis.title = element_blank(),
+        axis.line = element_blank(), 
+       plot.background=element_rect(fill="#DCFCE6"),
+       legend.position="none", plot.title=element_text(hjust=0.5))
+
+
+```
+
+
+### Classification
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE,fig.width=8,fig.height=8}
+
+txt1 <- tiki_jd %>%transmute(V1=str_to_lower(V1))%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))%>% mutate(co="tiki")%>%unnest_tokens(word,V1)
+
+txt2 <- shopee_jd %>%transmute(V1=str_to_lower(V1)) %>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))%>% mutate(co="shopee")%>%unnest_tokens(word,V1)
+
+txt3 <- lazada_jd %>%transmute(V1=str_to_lower(V1))%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))%>% mutate(co="lazada")%>%unnest_tokens(word,V1)
+
+txt<-bind_rows(txt1,txt2,txt3)%>%filter(!word %in% stop_words)%>%anti_join(stop_w)%>%filter(!word %in% stop_j)
+
+txt_cs<- txt%>%count(co,word)%>%cast_dtm(co,word,n)
+
+ap_lda<-LDA(txt_cs,k=4,control = list(seed=1234))
+
+co_word<- tidy(ap_lda,matrix="beta")%>%group_by(topic)%>%top_n(10,beta)
+
+gg<-co_word%>%group_by(topic)%>%top_n(5,term)%>%ungroup()%>%ggplot(aes(x=fct_reorder(term,desc(beta)),y=beta,fill=topic))+geom_bar(stat="identity")+coord_flip()+facet_wrap(~topic,scales = "free")+theme_pander()+scale_fill_viridis_c()+theme(legend.position = "none")+xlab("")+ylab("")
+
+ggplotly(gg)
+
+
+
+
+
+
+
+```
+
+
+## Job Requirement{.tabset .tabset-faded .tabset-pills} 
+
+### RQ_Network
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE,fig.width=14,fig.height=10}
+
+txt2<- bind_rows(tiki_rq,shopee_rq,lazada_rq)%>%transmute(V1=str_to_lower(V1))
+
+txt1_V2<- txt2%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+
+bigram1_graph<-txt1_V2%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>%count(word1,word2,sort=TRUE)%>%filter(n>1)%>%graph_from_data_frame()
+
+a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+
+ggraph(bigram1_graph, layout = "fr") + geom_edge_link(
+               aes(edge_alpha = n*100,edge_width=n*3),edge_colour="darkred") + geom_node_point(color = "black", size=5) + geom_node_text(aes(label = name),repel=TRUE,point.padding=unit(0.2,"lines"), vjust = 1, hjust = 1) +theme_void()+theme(axis.ticks = element_blank(),
+        axis.text.y=element_blank(),
+        axis.title = element_blank(),
+        axis.line = element_blank(), 
+       plot.background=element_rect(fill="#DCFCE6"),
+       legend.position="none", plot.title=element_text(hjust=0.5))
+
+
+```
+
+### Classification
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE,fig.width=8,fig.height=8}
+
+txt1 <- tiki_rq %>%transmute(V1=str_to_lower(V1))%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))%>% mutate(co="tiki")%>%unnest_tokens(word,V1)
+
+txt2 <- shopee_rq %>%transmute(V1=str_to_lower(V1)) %>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))%>% mutate(co="shopee")%>%unnest_tokens(word,V1)
+
+txt3 <- lazada_rq %>%transmute(V1=str_to_lower(V1))%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))%>% mutate(co="lazada")%>%unnest_tokens(word,V1)
+
+txt<-bind_rows(txt1,txt2,txt3)%>%filter(!word %in% stop_words)%>%anti_join(stop_w)%>%filter(!word %in% stop_j)
+
+txt_cs<- txt%>%count(co,word)%>%cast_dtm(co,word,n)
+
+ap_lda<-LDA(txt_cs,k=6,control = list(seed=1234))
+
+co_word<- tidy(ap_lda,matrix="beta")%>%group_by(topic)%>%top_n(10,beta)
+
+gg<-co_word%>%group_by(topic)%>%top_n(4,term)%>%ungroup()%>%ggplot(aes(x=fct_reorder(term,desc(beta)),y=beta,fill=topic))+geom_bar(stat="identity")+coord_flip()+facet_wrap(~topic,scales = "free")+theme_pander()+scale_fill_viridis_c()+theme(legend.position = "none")+xlab("")+ylab("")
+
+ggplotly(gg)
+
+
+
+
+
+
+
+```
+
+
+
+
+
+

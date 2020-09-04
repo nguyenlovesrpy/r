@@ -1,0 +1,199 @@
+---
+title: "Ex-IM Jobs Analysis"
+author: "LSC_RnD"
+date: "Aug 22 2020"
+output: 
+               flexdashboard::flex_dashboard:
+               toc: true 
+               toc_float: true
+               number_sections: true  
+               theme: united  
+               highlight: tango  
+               css: my.css   
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, include=FALSE, warning=FALSE,message=FALSE}
+
+setwd("C:/Users/DellPC/Desktop/Corner/R_source_code/training_RnD/JD_in_xnk")
+
+suppressMessages(library(tidyverse))
+suppressMessages(library(scales))
+suppressMessages(library(ggraph))
+suppressMessages(library(igraph))
+suppressMessages(library(tidyr))
+suppressMessages(library(tidytext))
+suppressMessages(library(DT))
+suppressMessages(library(wordcloud))
+suppressMessages(library(wordcloud2))
+suppressMessages(library(plotly))
+suppressMessages(library(reshape2))
+suppressMessages(library(ggthemes))
+suppressMessages(library(widyr))
+suppressMessages(library(topicmodels))
+suppressMessages(library(TOC))
+suppressMessages(library(readxl))
+suppressMessages(library(collapsibleTree))
+
+tiki_jd <- read_excel("jd.xlsx")%>% mutate(position = 'im-ex')
+
+
+```
+
+<hr>
+
+
+<style>                     
+.navbar {
+  background-color:"B3E2CD";
+  border-color:green;
+}
+.navbar-brand {
+color:white!important;
+}
+</style>  
+
+
+
+
+Frequency of 2-word
+===============================================================================
+
+Row {data-height=350} {.tabset .tabset-faded .tabset-pills}
+---------------------------------------------------------------------
+
+
+### Job Position
+
+```{r,,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+tiki_jd %>% collapsibleTreeSummary(hierarchy = c("position","Job"),root="Job",width=100,zoomable = TRUE,fillFun = colorspace::diverging_hsv)
+
+```
+
+
+
+### Job Description
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+
+
+
+
+txt1<- tiki_jd %>%transmute(V1=str_to_lower(Description))
+
+txt1_V1<- txt1%>%transmute(V1=str_remove(V1,pattern = "[:punct:]")) 
+
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>% unite(bigram,word1,word2,sep=" ")%>%count(bigram,sort=TRUE)%>%filter(n>0)
+
+
+gg <-
+               txt1_V2 %>% group_by(bigram) %>%head(30) %>% ggplot(aes(x = reorder(str_to_title(bigram), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "palegreen",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Description") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+
+```
+
+
+### Job Requirement
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+
+txt1<- tiki_jd %>%transmute(V1=str_to_lower(Requirement))
+
+txt1_V1<- txt1%>%transmute(V1=str_remove(V1,pattern = "[:punct:]")) 
+
+
+
+txt1_V2<-txt1_V1%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>% unite(bigram,word1,word2,sep=" ")%>%count(bigram,sort=TRUE)%>%filter(n>0)
+
+
+gg <-
+               txt1_V2 %>% group_by(bigram) %>%head(40) %>% ggplot(aes(x = reorder(str_to_title(bigram), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "cyan4",
+                              color = "black",
+                              alpha = 0.6
+               ) + coord_flip() + theme_minimal() + labs(title = "Requirement") +
+               xlab("Frequency") + ylab("General Activity")
+
+ggplotly(gg)
+
+
+
+
+```
+
+Tree Network
+===============================================================================
+
+Row {data-height=350} {.tabset .tabset-faded .tabset-pills}
+---------------------------------------------------------------------
+
+### Job Description
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=14,fig.height=10}
+
+txt2<-tiki_jd%>%transmute(V1=str_to_lower(Description))
+
+txt1_V2<- txt2%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+
+bigram1_graph<-txt1_V2%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>%count(word1,word2,sort=TRUE)%>%filter(n>1)%>%graph_from_data_frame()
+
+a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+
+ggraph(bigram1_graph, layout = "fr") + geom_edge_link(
+               aes(edge_alpha = n*100,edge_width=n*3),edge_colour="cyan4") + geom_node_point(color = "black", size=5) + geom_node_text(aes(label = name),repel=TRUE,point.padding=unit(0.2,"lines"), vjust = 1, hjust = 1) +theme_void()+theme(axis.ticks = element_blank(),
+        axis.text.y=element_blank(),
+        axis.title = element_blank(),
+        axis.line = element_blank(), 
+       plot.background=element_rect(fill="#DCFCE6"),
+       legend.position="none", plot.title=element_text(hjust=0.5))
+
+
+```
+
+
+
+Row {data-height=350} {.tabset .tabset-faded .tabset-pills}
+---------------------------------------------------------------------
+
+### Job Requirement
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=14,fig.height=10}
+
+txt2<-tiki_jd%>%transmute(V1=str_to_lower(Requirement))
+
+txt1_V2<- txt2%>%transmute(V1=str_remove(V1,pattern = "[:punct:]"))
+
+bigram1_graph<-txt1_V2%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>%count(word1,word2,sort=TRUE)%>%filter(n>1)%>%graph_from_data_frame()
+
+a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+
+ggraph(bigram1_graph, layout = "fr") + geom_edge_link(
+               aes(edge_alpha = n*100,edge_width=n*3),edge_colour="white") + geom_node_point(color = "darkred", size=5) + geom_node_text(aes(label = name),repel=TRUE,point.padding=unit(0.2,"lines"), vjust = 1, hjust = 1, color ='royalblue') +theme_void()+theme(axis.ticks = element_blank(),
+        axis.text.y=element_blank(),
+        axis.title = element_blank(),
+        axis.line = element_blank(), 
+       plot.background=element_rect(fill="black"),
+       legend.position="none", plot.title=element_text(hjust=0.5))
+
+
+```

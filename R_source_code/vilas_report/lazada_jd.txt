@@ -1,0 +1,127 @@
+Introduction to Specific BU/Country: The Business Intelligence team supports the Lazada business to drive data led decisions, collecting data from various sources to analyse metrics related to Buyers, sellers & our customers.
+The role:
+We focus on understanding big data, and act as a bridge between the technical and commercial side of business and uses data to align with strategic goals. If you like a good challenge and love to find new ways of interpreting data then you’re a perfect fit.
+Key tasks and responsibilities:
+Be the expert in using data to measure and analyse business performance in each our markets and lines of business.
+Explore business issues/opportunities, uncover insights and/or identify targeted areas for business growth.
+Partner with management and operational teams to deep dive on core issues and use our data to find answers.
+Collaborate with various expert teams to rollout effective products/services and to expand data for building richer insights.
+Lead new data analytics capability rollouts and/or data-led initiatives throughout Lazada
+Monitor key metrics and alert the business on potential issues.
+Analyse operational efficiency and build business models to guide decision-making.
+Design market/business intelligence reports and performance measurement dashboards to share with senior management
+Daily/Weekly/monthly performance analysis to monitor the performance of business, to locate risk and to discover potential business opportunities.
+Perform ad-hoc business analysis, to drill down on certain business challenges, providing conclusions and advice based on data analysis.
+Help summarizing data analysis requirements to conduct data application projects (need communication with data tech team).
+As Lazada eLogistics products are growing more complex, the need for more robust testing, and more testing period, has grown exponentially. Reporting to the Head of Engineering, the Senior Manual QA Engineer will be part of small but epic team. In this position, you will work closely with our Back-End, Front-End and Product teams on a variety of initiatives. If you are looking for a position to take your career in QA to the next level, this may be the job for you.
+Reporting to Technical Lead, you will be responsible for:
+Review product specifications and develop test plans for new products/features and ensure adequate test coverage.
+Create and execute test cases to ensure functionality matches requirements.
+Continuously improve existing test cases and processes to increase efficiency and reliability.
+Reproduce, isolate, and debug issues, providing detailed bug reports.
+Record all test results for each test suite and provide a high level summary for areas tested.
+Maintain proper documentation for new and existing functionality by working closely with Product Managers and Lead Engineers.
+Mentor and train junior QA members on new testing processes and techniques.
+As a Engineering Manager in LELTECH Team, you'll be part of an extremely motivated and experienced group of people. You'll help drive Lazada eLogistics platform and be a key contributor to business success. You'll work on stability, scalability and growth of our network operations, driving provision of operations and logistics solutions for more than 100.000.000 users in region, you will help our customers to get more than 9.5 million orders a month.
+Responsibilities:
+Be a direct manager to a team of software developers and testers
+Sustain and improve development process (we are currently using scrum)
+Be a leader - motivate and inspire your team to deliver value to the company and its users
+Solve the majority of blockers and problems arising during the development process, escalate the remaining ones as soon as possible
+Be compliant with and help to spread Lazada company values within your team
+Build growth plans, help on personal improvements, evaluate each team member
+Take full ownership over a specific domain(s) within our logistics ecosystem
+Propose and facilitate both technical and product improvements
+Monitor performance, make necessary improvements to ensure stability of your services
+Taking architectural design decisions within your domain(s)
+Be a domain expert knowing both technical implementation and business requirements behind it
+Maintain documentation
+Constant value delivery
+Help to improve business and product requirements with technical insight by proposing innovative solutions
+Deliver projects within the committed timelines
+Support deployment and testing process (may require occasional business trips)
+Coordinate with other team leaders for delivery of complex projects
+Take a part in managing the roadmap of your team
+Key tasks and responsibilities: 
+Guided Shopping Associate acts as the business owner for all onsite performance management activities and performs as the main stakeholder for onsite with regards to the development of respective reporting tools and testing features of category performance on Lazada platform. The key responsibilities are to:
+Guided shopping channels.
+Search optimization.
+Conduct quality checks on search algorithm relevance for category’s top search keywords.
+Diagnose search feedback provided by users, for algorithm team to fix.
+Define category decision trees and optimize search performance
+Operate and optimize all search tools and pilot new tools basing on the category trends
+Participate in User Acceptance Tests (UAT) of new search tools.
+Perform competitive checks on search relevance and search features.
+Monitor search performance and deep dive onsite customer behaviour to identify areas of improvement.
+Build and maintain reports and draw basic conclusions based on analysis and business understanding.
+Manage search related requests of one venture (approval, execution and monitoring).
+Educate category team on Search topics and updates. 
+
+Other traffic channels : Feed, collection, Snowball
+Analysis on these channels performance, then to make action plan to improve .
+Connect with KAM & SE team to support sellers on these tasks to improve seller performance & increase traffic efficiency.
+Long term strategy to develop stable performance for thee traffics sources.
+Daily operation as a routine to increase CR%, guided GMV & guided IPV on Mega campaigns.
+
+ Livestream.
+Analysis on livestream channel performance to prepare next action plan.
+Deliver target by normal operation task to KAM team to hunt for seller livestream.
+Cooperate with S&P team on seller hunting & MKT on process for livestream.
+Strategy for Mega campaign planning to achieve target livestream : follower, guided GMV, CR%, IPV. 
+
+Other tasks : assigned by DOC & line manager Onsite Management
+Act as the business owner for all onsite performance management activities of category on Lazada platfor
+Be the main stakeholder for onsite with regards to the development of respective reporting tools and testing features
+Have a perfect knowledge of the different consumer platforms (web and app) and customer journeys
+Be the referent in category team to explain how App and website work and what are the functions of each vertical and how do optimize them
+Work closely with Category Director and corporate guided shopping counterpart on search/category (banners, landing page, ranking…), recommendation, collections, stores and overall navigation to improve the product and share the local business needs
+
+Support the roll out of any new features as well as adoption rate
+Monitor and optimize each vertical of Customer Journey: Search, Findability, Collections, Official Stores, Store Builders to support category.
+Work with the consumer analytics team to define the key metrics framework for onsite optimization and performance.
+Think holistically about onsite performance in order to identify business opportunities to better support engagement, commercialization and monetization of category on the platform
+Act as subject matter expert (SME) for performance management and onsite metrics.
+Drive and execute the A/B and multivariate testing calendar and roadmap, ensuring delivery of actionable insights and best practice case studies.
+Work together with Analytics teams to create and optimize tracking and reporting framework
+Establish and maintain processes to communicate best practices across local Onsite teams
+Lead project management and communication for all local initiatives related to onsite performance management
+
+Manager, Business Analytics is responsible for managing, analysing, deep diving business data performance of Seller Supply Function, including to:
+Take a lead on strategic Seller Supply projects, managing its scope, analysis, implementation and deliverables
+Work on data analysis to generate performance reports for Seller Supply operations
+Work with Head of Seller Supply in effectively monitoring the business analytical and business performance projects you are part of and drive data for business decisions and direction of Seller Supply.
+Prioritize mass and hunted inflow to guide acquisition and BD team
+Conduct new seller segmentation (0 to 90D) to provide specific support per segment.
+Report to Head of Horizontal Function, you will be responsible for:
+
+
+Plan and monitor solid year-round campaign planning with clear segmentation for Electronics category
+Coordinate with Campaign Team on mega/A+ campaigns with goal achievement
+Lead A campaign for category with goal achievement.
+Facilitate main category campaigns.
+Ensure that all the Campaign and its landing pages are presented to the highest standards, with the priorities of the customer front-of-mind.
+Ensure that the relevant departments, categories, business functions are represented and that appropriate product selections have been made.
+Develop the campaign marketing plan and define processes for high impact deals hubs like New Arrivals, Bestsellers and during Campaigns like Birthday, Shopping Festival 11.11, etc.
+Conduct long and short-term traffic planning that speaks to seasonal marketing strategies as well as long-term objectives, online and offline.
+Regularly manage and oversee the campaign Performance – daily, peak events, – working closely with Flash Sales Team and Key Account Management Team.
+Partnering with Online marketing team and Integrated Marketing, Guided Shopping team (Search, Ranking, Product Badge) to plan, develop, execute and analyse marketing campaigns across online and offline channels.
+Be a co-owner for the category campaigns, working with Integrated Marketing and Product teams to improve customer experience and build a robust, clutter breaking deals platform.
+Compile, analyse, and present performance metrics and enlighten potential opportunities for program growth.
+Establishing guidelines and best practice for the execution of category campaigns.
+Working with Customers Behavior Analytics / Business Intelligence team, local finance teams and marketing business intelligence teams to measure and report the results of your efforts.
+Work with the Marketing Solutions team to compile compelling sponsorship opportunities.
+Work with tech teams to drive hands-off-the-wheel deals automation
+Monitor solid year-round campaign planning with clear segmentation for category Fashion & FMCG (Health & Beauty, Mom Baby, Groceries)
+Coordinate with Campaign Team on mega/A+ campaigns with goal achievement
+Lead A campaign for category with goal achievement.
+Facilitate main category campaigns. Ensure that all the Campaign and its landing pages are presented to the highest standards, with the priorities of the customer front-of-mind. Ensure that the relevant departments, categories, business functions are represented and that appropriate product selections have been made.
+Develop the campaign marketing plan and define processes for high impact deals hubs like New Arrivals, Bestsellers and during Campaigns like Birthday, Shopping Festival 11.11, etc.
+Conduct long and short-term traffic planning that speaks to seasonal marketing strategies as well as long-term objectives, online and offline
+Regularly manage and oversee the campaign Performance – daily, peak events, – working closely with Flash Sales Team and Key Account Management Team.
+Partnering with Online marketing team and Integrated Marketing, Guided Shopping team (Search, Ranking, Product Badge) to plan, develop, execute and analyse marketing campaigns across online and offline channels.
+Be a co-owner for the category campaigns, working with Integrated Marketing and Product teams to improve customer experience and build a robust, clutter breaking deals platform.
+Compile, analyse, and present performance metrics and enlighten potential opportunities for program growth.
+Establishing guidelines and best practice for the execution of category campaigns.
+Working with Customers Behaviour Analytics / Business Intelligence team, local finance teams and marketing business intelligence teams to measure and report the results of your efforts.
+Work with the Marketing Solutions team to compile compelling sponsorship opportunities.
+Work with tech teams to drive hands-off-the-wheel deals automation

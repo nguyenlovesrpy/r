@@ -1,0 +1,101 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(ISLR)
+library(tidyverse)
+
+names(Smarket)
+summary(Smarket)
+cor(Smarket[,-9])
+```
+
+# Logisitc Regression
+
+```{r}
+glm.fit<- glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,data=Smarket,family="binomial")
+
+summary(glm.fit)
+
+coef(glm.fit)
+
+summary(glm.fit)$coef[,4]
+
+glm.probs<- predict(glm.fit,type="response")
+glm.probs[1:10]
+
+contrasts(Smarket$Direction)
+
+glm.pred<- rep("Down",1250)
+
+glm.pred[glm.probs>0.5]="Up"
+
+table(glm.pred,Smarket$Direction)
+
+```
+
+# Linear Discriminant Analysis
+
+```{r}
+
+train<- Smarket%>%filter(Year<2005)
+test<-  Smarket%>%filter(Year==2005)
+
+library(MASS)
+lda.fit<- lda(Direction~Lag1+Lag2,data=train)
+lda.pred<- predict(lda.fit,newdata=test)
+names(lda.pred)
+
+lda.class<- lda.pred$class
+
+lda.class
+
+table(lda.class,test$Direction)
+
+predict(lda.fit,newdata =data.frame(Lag1=c(1.2,1.5),Lag2=c(1.1,-0.8)),type="response")
+
+
+```
+
+
+# Quadratic Discriminant Analysis
+
+```{r}
+
+qda.fit<- qda(Direction~Lag1+Lag2,data=train)
+
+qda.fit
+
+qda.class<- predict(qda.fit,test)$class
+
+table(qda.class,test$Direction)
+
+mean(qda.class==test$Direction)
+```
+
+
+# K-nearest Neighbors
+
+```{r}
+library(dplyr)
+library(class)
+
+train<- Smarket%>%filter(Year<2005)
+test<-  Smarket%>%filter(Year==2005)
+
+train.X <-train%>% dplyr::select(Lag1, Lag2)
+test.X <-test%>% dplyr::select(Lag1,Lag2)
+
+train.Direction<- train$Direction
+
+set.seed(1)
+
+knn.pred<- knn(train.X,test.X,train.Direction,k=1)
+
+
+table(knn.pred,test$Direction)
+
+mean(knn.pred==test$Direction)
+```

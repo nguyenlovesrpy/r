@@ -1,0 +1,155 @@
+---
+title: "cloth_review"
+author: "Nguyen_LSCM"
+date: "4/5/2020"
+output: html_document
+---
+
+# Load libraries
+```{r,include=FALSE}
+
+library(tidyverse)
+library(tidytext)
+library(tidyr)
+library(dplyr)
+library(widyr)
+library(kableExtra)
+library(textdata)
+library(ggplot2)
+library(wordcloud)
+library(reshape2)
+library(igraph)
+library(grid)
+library(tm)
+library(Matrix)
+library(topicmodels)
+library(quanteda)
+library(psych)
+library(DT)
+library(RColorBrewer)
+library(ggsci)
+library(plotly)
+library(ggraph)
+library(igraph)
+library(gridExtra)
+
+```
+
+# Read and adjust datasets
+
+```{r,echo=FALSE,include=FALSE}
+
+setwd("C:/Users/DellPC/Desktop/R_source_code/cloth_ecommerce_review")
+
+cloth<- read.csv("cloth_review.csv")%>%select(-X)
+colnames(cloth)<-c("cloth_id","age","title","review.txt","rating","recommend.rate","positive.fb","devision","department","class")
+
+txt<-cloth%>% select(title)%>%mutate(title=str_to_lower(title),!str_detect(title,pattern = "[punct:]",title!="NULL"))%>%select(title)
+view<-txt%>%head(20)%>%datatable()
+
+negative_words<-c("not","too","but","no")
+
+text<-txt%>%unnest_tokens(word,title,token = "ngrams",n=2)%>%separate(word,c("word1","word2"),sep=" ")%>%filter(word1 %in% negative_words)%>%filter(!word2 %in% stop_words,!word2 %in% negative_words)%>%group_by(word1,word2)%>%count(sort=TRUE)
+
+binds_text<-bind_rows(text%>%filter(word1=="not")%>%head(15),text%>%filter(word1=="too")%>%head(15),text%>%filter(word1=="without")%>%head(15),text%>%filter(word1=="but")%>%head(15),text%>%filter(word1=="no")%>%head(15))
+
+
+
+
+
+```
+
+# Analyze {.tabset}
+
+## Title {.tabset}
+
+### Statistics
+
+```{r, echo=FALSE,fig.align="center",fig.height=8,fig.width=8}
+
+gg1<- txt%>%unnest_tokens(word,title)%>%group_by(word)%>%count(sort=TRUE)%>%ungroup()%>%ggplot(aes(x=n))+geom_histogram(bins=40)+labs(title="The frequency of each word")+xlab("Frequency")+ylab("Most frequent words")+theme_minimal()
+
+
+txt1<-txt%>%unnest_tokens(word,title)%>%filter(!word %in% stop_words)%>%group_by(word)%>%count(sort=TRUE)
+gg2<- txt1 %>%head(20)%>%ggplot(aes(x=reorder(word,n),y=n))+geom_bar(aes(fill=factor(word)),stat="identity")+theme_minimal()+xlab("Frequency")+ylab("Most frequent words")+coord_flip()+labs(title="Top 20 frequency of each word")+theme(legend.title = element_blank())
+
+
+txt2<-txt%>%unnest_tokens(word,title)%>%group_by(word)%>%count(sort=TRUE)%>%inner_join(get_sentiments("bing"))
+                                                                                      
+gg3<-txt2 %>%head(20)%>%ggplot(aes(x=reorder(word,n),y=n))+geom_bar(aes(fill=factor(word)),stat="identity")+theme_minimal()+xlab("Frequency")+ylab("Most frequent words")+labs(title="Top 20 frequency of each word")+coord_flip()
+
+
+txt3<-txt%>%unnest_tokens(word,title)%>%inner_join(get_sentiments("bing"))%>%mutate(value=ifelse(sentiment=="positive",1,-1))%>%count(word,value,sort=TRUE)%>%ungroup()
+
+txt4<-bind_rows(txt3%>%head(15),txt3%>%filter(value==-1)%>%head(15))%>%mutate(number=n*value)
+
+gg4<- txt4 %>%ggplot(aes(x=reorder(word,number),y=number))+geom_bar(aes(,color="white",fill=number>0),stat="identity")+coord_flip()+theme_minimal()+scale_fill_tron()
+
+ggplotly(gg1)
+ggplotly(gg2)
+ggplotly(gg3)
+ggplotly(gg4)
+
+```
+
+### Wordcloud
+
+```{r,echo=FALSE,fig.align="center",fig.height=8,fig.width=8}
+
+txt2%>%with(wordcloud(words=word,freq = n,max.words = 100,colors = brewer.pal(11,"PuOr")))
+
+txt2%>%acast(word~sentiment,value.var = "n",fill=0)%>%comparison.cloud(colors = c("blue","black"),max.words = 100,title.colors = "gray")
+
+```
+
+### Critical-Aspect
+
+```{r,echo=FALSE,fig.align="center",fig.height=8,fig.width=8}
+
+text_al<-txt%>%unnest_tokens(word,title,token = "ngrams",n=2)%>%separate(word,c("word1","word2"),sep=" ")%>%filter(word1 %in% negative_words)%>%filter(!word2 %in% stop_words,!word2 %in% negative_words)%>%inner_join(get_sentiments("bing"),by=c("word2"="word"))%>%group_by(word1,word2)%>%count(sort=TRUE)
+
+binds_text<-bind_rows(text_al%>%filter(word1=="not")%>%head(15),text%>%filter(word1=="too")%>%head(15),text%>%filter(word1=="without")%>%head(15),text%>%filter(word1=="but")%>%head(15),text%>%filter(word1=="no")%>%head(15))
+
+
+plot_f1<- function(df,color){
+               text%>%filter(word1==df)%>%head(15)%>%ggplot(aes(x=reorder(word2,n),y=n))+geom_bar(stat="identity",fill=color,color="white")+coord_flip()+labs(title = paste0(df))+theme(axis.text.y = element_text(vjust=1,hjust = 1,angle = 45))+xlab(paste("word: ",df," in list"))+ylab("Frequency")+theme_minimal()
+}
+
+color<-c(brewer.pal(4,"Spectral"))
+plot<-list()
+plot<-map2(negative_words,color,plot_f1)
+p<-marrangeGrob(plot,nrow=2,ncol=2)
+p
+
+```
+
+##Title-Review {.tabset}
+
+```{r, echo=FALSE}
+
+txt<-cloth%>% transmute(review=str_to_lower(paste(title," ",review.txt)))%>%transmute(review=str_remove_all(review,pattern = "[[:punct:]]"))%>%transmute(review=str_remove_all(review,pattern = "[[:digit:]]"))%>%unnest_tokens(word,review,token = "ngrams",n=2)%>%separate(word,c("word1","word2"),sep=" ")%>%filter(!word1 %in% stop_words,!word2 %in% stop_words)
+
+useless_word<-c("this in the of for with and but so its now  on at a it is i to")
+
+useless_word<-tibble(useless_word)%>%unnest_tokens(word,useless_word)
+
+
+txt_bigram<- txt%>%inner_join(get_sentiments("bing"),by=c("word1"="word"))%>%anti_join(useless_word,by=c("word2"="word"))%>% transmute(bigram=paste0(word1," ",word2),sentiment)%>%group_by(bigram,sentiment)%>%count(sort=TRUE)
+
+txt_bigram%>% with(wordcloud(words=bigram,freq = n,max.words = 15))
+
+txt_bigram%>%acast(bigram~sentiment,value.var = "n",fill=0)%>%comparison.cloud(colors = c("lightblue","orange"),max.words = 100)
+
+txt_bigram<- txt%>%inner_join(get_sentiments("bing"),by=c("word1"="word"))%>%anti_join(useless_word,by=c("word2"="word"))%>%count(word1,word2,sort = TRUE)%>%graph_from_data_frame()
+
+set.seed(2016)
+a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+
+ggraph(txt_bigram, layout = "fr") +
+geom_edge_link(aes(edge_alpha = n), show.legend = FALSE,
+arrow = a, end_cap = circle(.07, 'inches')) +
+geom_node_point(color = "lightblue", size = 5) +
+geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+theme_void()
+
+```
