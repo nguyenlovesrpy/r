@@ -1,0 +1,213 @@
+---
+title: "Training"
+author: "Team Training"
+date: "Aug 18 2020"
+output: 
+               flexdashboard::flex_dashboard:
+               toc: true 
+               toc_float: true
+               number_sections: true  
+               theme: united  
+               highlight: tango  
+               css: my.css   
+---
+
+
+
+<hr>
+
+
+<style>                     
+.navbar {
+  background-color:"B3E2CD";
+  border-color:green;
+}
+.navbar-brand {
+color:white!important;
+}
+</style>  
+
+``` {js}
+// Inverse color of navigation bar.
+$('.navbar-inverse').removeClass('navbar-inverse').addClass('navbar-default');
+```
+
+
+
+```{r}
+
+
+setwd("C:/Users/DellPC/Desktop/corner/R_source_code/lsc_report")
+
+suppressMessages(library(tidyverse))
+suppressMessages(library(scales))
+suppressMessages(library(ggraph))
+suppressMessages(library(igraph))
+suppressMessages(library(tidyr))
+suppressMessages(library(tidytext))
+suppressMessages(library(DT))
+suppressMessages(library(wordcloud))
+suppressMessages(library(wordcloud2))
+suppressMessages(library(plotly))
+suppressMessages(library(reshape2))
+suppressMessages(library(ggthemes))
+suppressMessages(library(widyr))
+suppressMessages(library(topicmodels))
+suppressMessages(library(TOC))
+suppressMessages(library(readxl))
+suppressMessages(library(tvthemes))
+suppressMessages(library(scales))
+suppressMessages(library(dplyr))
+
+
+df <- read_excel('lsc_survey.xlsx')
+
+```
+
+
+
+
+Tổng quan
+================================================================================
+
+Row {.tabset .tabset-faded .tabset-pills}
+---------------------------------------------------------------------
+
+
+### Nguyện vọng chung
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+txt1_V2<- df%>%transmute(V1 =str_remove(General,pattern = "[:punct:]"))
+
+bigram1_graph<-txt1_V2%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>%count(word1,word2,sort=TRUE) %>% filter(n>1) %>%graph_from_data_frame()
+
+a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+
+ggraph(bigram1_graph, layout = "fr") + geom_edge_link(
+               aes(edge_alpha = n*10000,edge_width=n*100000),edge_colour="royalblue") + geom_node_point(color = "green", size=5) + geom_node_text(aes(label = name),repel=TRUE,point.padding=unit(0.2,"lines"), vjust = 1, hjust = 1) +theme_void()+theme(axis.ticks = element_blank(),
+        axis.text.y=element_blank(),
+        axis.title = element_blank(),
+        axis.line = element_blank(), 
+       plot.background=element_rect(fill="#DCFCE6"),
+       legend.position="none", plot.title=element_text(hjust=0.5))
+
+
+```
+
+
+
+### Số nguyện vọng từ mỗi ban
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center"}
+
+dt <- df %>% count(Dept, sort = TRUE)
+
+gg <- dt %>% ggplot(aes(x = fct_reorder(Dept, desc(n)), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "royalblue",
+                              color = "black",
+                              alpha = 0.8) + coord_flip() + tvthemes::theme_hildaNight()+ labs(x = 'Ban', y = 'Tổng số form')
+
+ggplotly(gg)
+
+
+```
+
+
+
+Chi tiết
+=====================================================================================
+Column {data-height=350} {.tabset .tabset-faded .tabset-pills}
+---------------------------------------------------------------------
+
+### Top kỹ năng cứng (Just One)
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+dt<- df %>%unnest_tokens(word, hard) 
+
+gg <-
+              dt %>% group_by(word) %>% count(sort = TRUE) %>% filter(n > 1) %>%
+               head(30) %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "royalblue",
+                              color = "black",
+                              alpha = 0.8
+               ) + coord_flip() + theme_minimal() + labs(title = "Hard Skills")  + theme_pander() +
+               xlab("Frequency") + ylab("Hard Skill")
+
+ggplotly(gg)
+
+
+```
+
+
+### Dept liên quan với nhau (Bi)
+
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+dt<- df %>% mutate(word = hard)
+
+gg <-
+              dt %>% group_by(word) %>% count(sort = TRUE) %>% filter(n > 0) %>%
+               head(30) %>% ggplot(aes(x = reorder(str_to_title(word), n), y = n)) + geom_bar(
+                              stat = "identity",
+                              fill = "darkred",
+                              color = "black",
+                              alpha = 0.8
+               ) + coord_flip() + theme_minimal() + labs(title = "Hard Skills - Bigram")  + theme_pander() +
+               xlab("Frequency") + ylab("Hard Skill")
+
+ggplotly(gg)
+
+
+```
+
+
+### Skills khác
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+txt1_V2<- df%>%transmute(V1 =str_remove(hard_other,pattern = "[:punct:]"))
+
+bigram1_graph<-txt1_V2%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>%count(word1,word2,sort=TRUE)%>%graph_from_data_frame()
+
+a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+
+ggraph(bigram1_graph, layout = "fr") + geom_edge_link(
+               aes(edge_alpha = n*10000,edge_width=n*100000),edge_colour="white") + geom_node_point(color = "red", size=5) + geom_node_text(aes(label = name),repel=TRUE,point.padding=unit(0.2,"lines"), vjust = 1, hjust = 1) +theme_tufte() +theme(axis.ticks = element_blank(),
+        axis.text.y=element_blank(),
+        axis.title = element_blank(),
+        axis.line = element_blank(), 
+       plot.background=element_rect(fill="royalblue"),
+       legend.position="none", plot.title=element_text(hjust=0.5))
+
+
+
+```
+
+
+### Kỹ năng mềm
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE,fig.align="center",fig.width=10,fig.height=8}
+
+txt1_V2<- df%>%transmute(V1 =str_remove(soft,pattern = "[:punct:]"))
+
+bigram1_graph<-txt1_V2%>%unnest_tokens(word,V1,token="ngrams",n=2)%>%separate(word,c("word1","word2"),sep = " ")%>% filter(!word1 %in% stop_words$word)%>%filter(!word2 %in% stop_words$word)%>%count(word1,word2,sort=TRUE) %>% filter(n>1) %>%graph_from_data_frame()
+
+a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+
+ggraph(bigram1_graph, layout = "fr") + geom_edge_link(
+               aes(edge_alpha = n*10000,edge_width=n*100000),edge_colour="royalblue") + geom_node_point(color = "green", size=5) + geom_node_text(aes(label = name),repel=TRUE,point.padding=unit(0.2,"lines"), vjust = 1, hjust = 1) +theme_void()+theme(axis.ticks = element_blank(),
+        axis.text.y=element_blank(),
+        axis.title = element_blank(),
+        axis.line = element_blank(), 
+       plot.background=element_rect(fill="lightyellow"),
+       legend.position="none", plot.title=element_text(hjust=0.5))
+
+
+
+```
+

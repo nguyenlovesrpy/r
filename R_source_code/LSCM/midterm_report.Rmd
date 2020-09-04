@@ -1,0 +1,625 @@
+---
+title: "Midterm Report"
+date: "5/22/2020"
+output: 
+               flexdashboard::flex_dashboard:
+               theme: sandstone
+               vertical_layout: scroll
+               highlight: monochrome
+               df_print: paged
+               toc: true
+               number_sections: true
+---
+
+
+```{r, fig.height=15,fig.width=20,include=FALSE}
+
+suppressMessages(library(tidyverse))
+suppressMessages(library(scales))
+suppressMessages(library(ggsci))
+suppressMessages(library(RColorBrewer))
+suppressMessages(library(ggthemes))
+suppressMessages(library(ggrepel))
+suppressMessages(library(patchwork))
+suppressMessages(library(highcharter))
+suppressMessages(library(plotly))
+
+
+
+custom_theme <- hc_theme(
+  colors = c('#5CACEE', 'green', 'red'),
+  chart = list(
+         backgroundColor = '#FAFAFA', 
+         plotBorderColor = "black"),
+  xAxis = list(
+         gridLineColor = "E5E5E5", 
+         labels = list(style = list(color = "#333333")), 
+         lineColor = "#E5E5E5", 
+         minorGridLineColor = "#E5E5E5", 
+         tickColor = "#E5E5E5", 
+         title = list(style = list(color = "#333333"))), 
+  yAxis = list(
+         gridLineColor = "#E5E5E5", 
+         labels = list(style = list(color = "#333333")), 
+         lineColor = "#E5E5E5", 
+         minorGridLineColor = "#E5E5E5", 
+         tickColor = "#E5E5E5", 
+         tickWidth = 1, 
+         title = list(style = list(color = "#333333"))),   
+  title = list(style = list(color = '#333333', fontFamily = "Lato")),
+  subtitle = list(style = list(color = '#666666', fontFamily = "Lato")),
+  legend = list(
+         itemStyle = list(color = "#333333"), 
+         itemHoverStyle = list(color = "#FFF"), 
+         itemHiddenStyle = list(color = "#606063")), 
+  credits = list(style = list(color = "#666")),
+  itemHoverStyle = list(color = 'gray'))
+
+
+
+
+master<- c("Afghanistan",
+           "Åland Islands",
+           "Albania",
+           "Algeria",
+           "American Samoa",
+           "Andorra",
+           "Angola",
+           "Anguilla",
+           "Antarctica",
+           "Antigua and Barbuda",
+           "Argentina",
+           "Armenia",
+           "Aruba",
+           "Australia",
+           "Austria",
+           "Azerbaijan",
+           "Bahamas",
+           "Bahrain",
+           "Bangladesh",
+           "Barbados",
+           "Belarus",
+           "Belgium",
+           "Belize",
+           "Benin",
+           "Bermuda",
+           "Bhutan",
+           "Bolivia (Plurinational State of)",
+           "Bonaire, Sint Eustatius and Saba",
+           "Bosnia and Herzegovina",
+           "Botswana",
+           "Bouvet Island",
+           "Brazil",
+           "British Indian Ocean Territory",
+           "United States Minor Outlying Islands",
+           "Virgin Islands (British)",
+           "Virgin Islands (U.S.)",
+           "Brunei Darussalam",
+           "Bulgaria",
+           "Burkina Faso",
+           "Burundi",
+           "Cambodia",
+           "Cameroon",
+           "Canada",
+           "Cabo Verde",
+           "Cayman Islands",
+           "Central African Republic",
+           "Chad",
+           "Chile",
+           "China",
+           "Christmas Island",
+           "Cocos (Keeling) Islands",
+           "Colombia",
+           "Comoros",
+           "Congo",
+           "Congo (Democratic Republic of the)",
+           "Cook Islands",
+           "Costa Rica",
+           "Croatia",
+           "Cuba",
+           "Curaçao",
+           "Cyprus",
+           "Czech Republic",
+           "Denmark",
+           "Djibouti",
+           "Dominica",
+           "Dominican Republic",
+           "Ecuador",
+           "Egypt",
+           "El Salvador",
+           "Equatorial Guinea",
+           "Eritrea",
+           "Estonia",
+           "Ethiopia",
+           "Falkland Islands (Malvinas)",
+           "Faroe Islands",
+           "Fiji",
+           "Finland",
+           "France",
+           "French Guiana",
+           "French Polynesia",
+           "French Southern Territories",
+           "Gabon",
+           "Gambia",
+           "Georgia",
+           "Germany",
+           "Ghana",
+           "Gibraltar",
+           "Greece",
+           "Greenland",
+           "Grenada",
+           "Guadeloupe",
+           "Guam",
+           "Guatemala",
+           "Guernsey",
+           "Guinea",
+           "Guinea-Bissau",
+           "Guyana",
+           "Haiti",
+           "Heard Island and McDonald Islands",
+           "Holy See",
+           "Honduras",
+           "Hong Kong",
+           "Hungary",
+           "Iceland",
+           "India",
+           "Indonesia",
+           "Côte d'Ivoire",
+           "Iran (Islamic Republic of)",
+           "Iraq",
+           "Ireland",
+           "Isle of Man",
+           "Israel",
+           "Italy",
+           "Jamaica",
+           "Japan",
+           "Jersey",
+           "Jordan",
+           "Kazakhstan",
+           "Kenya",
+           "Kiribati",
+           "Kuwait",
+           "Kyrgyzstan",
+           "Lao People's Democratic Republic",
+           "Latvia",
+           "Lebanon",
+           "Lesotho",
+           "Liberia",
+           "Libya",
+           "Liechtenstein",
+           "Lithuania",
+           "Luxembourg",
+           "Macao",
+           "Macedonia (the former Yugoslav Republic of)",
+           "Madagascar",
+           "Malawi",
+           "Malaysia",
+           "Maldives",
+           "Mali",
+           "Malta",
+           "Marshall Islands",
+           "Martinique",
+           "Mauritania",
+           "Mauritius",
+           "Mayotte",
+           "Mexico",
+           "Micronesia (Federated States of)",
+           "Moldova (Republic of)",
+           "Monaco",
+           "Mongolia",
+           "Montenegro",
+           "Montserrat",
+           "Morocco",
+           "Mozambique",
+           "Myanmar",
+           "Namibia",
+           "Nauru",
+           "Nepal",
+           "Netherlands",
+           "New Caledonia",
+           "New Zealand",
+           "Nicaragua",
+           "Niger",
+           "Nigeria",
+           "Niue",
+           "Norfolk Island",
+           "Korea (Democratic People's Republic of)",
+           "Northern Mariana Islands",
+           "Norway",
+           "Oman",
+           "Pakistan",
+           "Palau",
+           "Palestine, State of",
+           "Panama",
+           "Papua New Guinea",
+           "Paraguay",
+           "Peru",
+           "Philippines",
+           "Pitcairn",
+           "Poland",
+           "Portugal",
+           "Puerto Rico",
+           "Qatar",
+           "Republic of Kosovo",
+           "Réunion",
+           "Romania",
+           "Russian Federation",
+           "Rwanda",
+           "Saint Barthélemy",
+           "Saint Helena, Ascension and Tristan da Cunha",
+           "Saint Kitts and Nevis",
+           "Saint Lucia",
+           "Saint Martin (French part)",
+           "Saint Pierre and Miquelon",
+           "Saint Vincent and the Grenadines",
+           "Samoa",
+           "San Marino",
+           "Sao Tome and Principe",
+           "Saudi Arabia",
+           "Senegal",
+           "Serbia",
+           "Seychelles",
+           "Sierra Leone",
+           "Singapore",
+           "Sint Maarten (Dutch part)",
+           "Slovakia",
+           "Slovenia",
+           "Solomon Islands",
+           "Somalia",
+           "South Africa",
+           "South Georgia and the South Sandwich Islands",
+           "Korea (Republic of)",
+           "South Sudan",
+           "Spain",
+           "Sri Lanka",
+           "Sudan",
+           "Suriname",
+           "Svalbard and Jan Mayen",
+           "Swaziland",
+           "Sweden",
+           "Switzerland",
+           "Syrian Arab Republic",
+           "Taiwan",
+           "Tajikistan",
+           "Tanzania, United Republic of",
+           "Thailand",
+           "Timor-Leste",
+           "Togo",
+           "Tokelau",
+           "Tonga",
+           "Trinidad and Tobago",
+           "Tunisia",
+           "Turkey",
+           "Turkmenistan",
+           "Turks and Caicos Islands",
+           "Tuvalu",
+           "Uganda",
+           "Ukraine",
+           "United Arab Emirates",
+           "United Kingdom of Great Britain and Northern Ireland",
+           "United States of America",
+           "Uruguay",
+           "Uzbekistan",
+           "Vanuatu",
+           "Venezuela (Bolivarian Republic of)",
+           "Viet Nam",
+           "Wallis and Futuna",
+           "Western Sahara",
+           "Yemen",
+           "Zambia",
+           "Zimbabwe")
+
+master<- data.frame(country=master)
+
+
+map <- data.frame(country=c("United States of America","United Kingdom","South Africa","Egypt","Kenya","Mexico","Brazil","Chile","France","Portugal","Spain","Slovenia","Russia","China","India","Thailand","Vietnam","Indonesia","Malaysia","Philippines","South Korea","Japan","Romania","Colombia","Argentina","Morocco","Turkey","Uruguay","Zimbabwe","Pakistan","Myanmar","Australia","Nigeria","Bangladesh","Algeria","Iran"), group=c(rep("Nissan_remain",5),rep("Cross Production",18),rep("Renault_remain",4),rep("No longer",3),rep("New product Nissan",3),rep("Misubishi plant",1),rep("New product Renault",2)))
+
+
+master <- master %>%
+  mutate(country = fct_recode(country, "The Bahamas" = "Bahamas"),
+         country = fct_recode(country, "Cape Verde" = "Cabo Verde"),
+         country = fct_recode(country, "South Korea" = "Republic of Korea"),
+         country = fct_recode(country, "Russia" = "Russian Federation"),
+         country = fct_recode(country, "Republic of Serbia" = "Serbia"),
+         country = fct_recode(country, "United States of America" = "United States"))
+country<- master[,1]
+
+country<-unique(country)%>% as.data.frame()
+
+colnames(country)<-"country"
+
+
+sort<- country %>% filter(!as.logical(country %in% map$country))
+
+
+
+
+df1999<- data.frame(Ranking = c(1:20), Manufacturers =c("GM", "Ford", "Toyota-Daihatsu", "DaimlerChrysler", "Volkswagen","Fiat","PSA Peugeot Citroen","Nissan","Honda","Renault","Misubishi","Suzuki - Maruti" ,"Huyndai","BMW Rover","Mazda","Daewoo","Kia","Autovaz","Fuji-Subaru","Isuzu"), `Moter Vehicles`= c(8421000,6638000,5462000,4828000,4784000,2631000,2515000,2455000,2425000,2347000,1555000,15224000,1307000,1147000,967000,930000,796000,718000,577000,522000))%>%mutate(Group = ifelse(Manufacturers =="Nissan",1,ifelse(Manufacturers == "Renault",2,0)))
+
+
+df2016 <-data.frame(Ranking =c(1:20), Manufacturers =c("Toyota"," Vokswagen", "Huyndai" , "GM" , "Ford","Nissan"," Honda","Fiat","Renault","PSA Peugeot Citroen","Suzuki","SAIC","Daimler AG", "BMW","Changan"," Mazda","BAIC","Dongfeng Motor","Geely","Great  Wall") ,`Moter Vehicles` =c(10213486,10126281,7889538,7793066,6429485,5556241,4999266,4681457,3373278,3152787,2945295,2566793,2526450,2359756,1715871,1586013,1391643,1315490,1266456,1094360))%>%mutate(Group = ifelse(Manufacturers =="Nissan",1,ifelse(Manufacturers == "Renault",2,0)))
+
+
+
+
+gg1999 <-
+               df1999 %>% ggplot(aes(
+                              x = fct_reorder(Manufacturers, -desc(Moter.Vehicles)),
+                              y = Moter.Vehicles,
+                              label = Moter.Vehicles
+               )) + geom_col(aes(fill = factor(Group)), color = "white") + geom_label(fill =
+                                                                                                     "lightyellow", aes(label = paste(Moter.Vehicles, "$")), size = 12) + coord_flip() +
+               scale_y_continuous(labels = scales::dollar_format()) + theme_economist() +
+               labs(
+                              x = "",
+                              y = "",
+                              title = " Top Companies Have Units Manufactuered in 1999",
+                              subtitle = "Nissan is in 8 and Renault in top 10"
+               ) + scale_fill_manual(values=c("grey","palegreen","red")) + theme(
+                              legend.position = "none",
+                              axis.text.x = element_text(size = 20),
+                              axis.text.y = element_text(size = 20),title = element_text(size=24))
+               
+
+
+gg2016 <-
+               df2016 %>% ggplot(aes(
+                              x = fct_reorder(Manufacturers, -desc(Moter.Vehicles)),
+                              y = Moter.Vehicles,
+                              label = Moter.Vehicles
+               )) + geom_col(aes(fill = factor(Group)), color = "white") + geom_label(fill =
+                                                                                                     "lightyellow", aes(label = paste(Moter.Vehicles, "$")), size = 12) + coord_flip() +
+               scale_y_continuous(labels = scales::dollar_format()) + theme_economist() +
+               labs(x = "", y = "") + theme(axis.text.y = element_text(size = 12)) + labs(
+                              x = "",
+                              y = "",
+                              title = "Top Companies Have Units Manufactuered in 2016",
+                              subtitle = "Nissan is in 6 and Renault in top 9"
+               ) + scale_fill_manual(values=c("grey","palegreen","red")) + theme(
+                              legend.position = "none",
+                              axis.text.x = element_text(size = 20),
+                              axis.text.y = element_text(size = 20),title = element_text(size=24))
+               
+
+ggboth <-
+               df1999 %>% inner_join(df2016, by = "Manufacturers") %>% transmute(Manufacturers =
+                                                                                                Manufacturers,
+                                                                                 Group = Group.y,
+                                                                                 Moter.Vehicles = Moter.Vehicles.y) %>% ggplot(aes(
+                                                                                                x = fct_reorder(Manufacturers, -desc(Moter.Vehicles)),
+                                                                                                y = Moter.Vehicles,
+                                                                                                label = Moter.Vehicles
+                                                                                 )) + geom_col(aes(fill = factor(Group)), color = "white") + geom_label(fill =
+                                                                                                                                                                       "lightyellow", aes(label = paste(Moter.Vehicles, "$")), size = 12) + coord_flip() +
+               scale_y_continuous(labels = scales::dollar_format()) + theme_economist() +
+               labs(x = "", y = "") + theme(axis.text.y = element_text(size = 12)) + labs(
+                              x = "",
+                              y = "",
+                              title = "Top Companies Have Units Manufactuered in both 1999 and 2016",
+                              subtitle = "Nissan is in 6 and Renault in top 9"
+               ) + scale_fill_manual(values = c("grey", "palegreen", "red")) + theme(
+                              legend.position = "none",
+                              axis.text.x = element_text(size = 20),
+                              axis.text.y = element_text(size = 20),
+                              title = element_text(size = 20)
+               )
+
+```
+
+
+<style>                     
+.navbar {
+  background-color:"B3E2CD";
+  border-color:black;
+}
+.navbar-brand {
+color:red!important;
+}
+</style> 
+
+``` {js}
+// Inverse color of navigation bar.
+$('.navbar-inverse').removeClass('navbar-inverse').addClass('navbar-default');
+```
+
+Units_Manufacturing(1999-2016)
+=============================================================================
+
+Column {data-width=500 .colored }
+------------------------------------------------------------------------------
+
+### 1999
+
+```{r,fig.height=20,fig.width=24, echo=FALSE}
+
+gg1999
+
+```
+
+
+Column {.tabset .tabset-pills .tabset-fade data-width=500 .colored }
+------------------------------------------------------------------------------
+
+### 2016
+
+```{r, fig.height=20,fig.width=24,echo=FALSE}
+
+gg2016
+
+```
+
+
+### Both_1999&2016 
+ 
+ ```{r, fig.height=20,fig.width=17,echo=FALSE}
+ 
+ggboth
+
+```
+
+
+
+Alliance in 2017
+=======================================================================
+
+Column {.tabset .tabset-fade data-width=400 .colored }
+------------------------------------------------------------------------------
+
+```{r, include=FALSE}
+
+dffirm<- data.frame(firm = c("VAG","TOYOTA","GM","RENAULT-NISSAN-VAZ-MMC","HUYNDAI-KIA","FORD","NISSAN","HONDA","FCA","RENAULT","PSA","SUZUKI","DAIMLER","BMW","MAZDA","MITSUBISHIMOTORS"),value=c(10.13,10.01,9.90,9.96,7.82,6.66,5.56,4.97,4.72,3.18,3.15,2.85,2.54,2.37,1.55,0.93))%>%mutate(Group=ifelse(firm=="NISSAN",1,ifelse(firm=="RENAULT",2,ifelse(firm=="RENAULT-NISSAN-VAZ-MMC",3,ifelse(firm=="MITSUBISHIMOTORS",4,0)))))
+
+```
+
+
+```{r, fig.height=9,fig.width=9,echo=FALSE}
+
+ dffirm%>% ggplot(aes(x= fct_reorder(firm, -desc(value)), y = value,group=Group,label= value))+geom_bar(stat="identity",aes(fill= factor(Group)))+theme_minimal()+labs(color="",x="",y="",title ="Automotive Firms 2016 Sales (in million units)")+ coord_flip()+ scale_fill_manual(values=c("grey","palegreen","red","orange","yellow"))+scale_y_continuous(breaks=c(1*c(0:20)))+theme_economist()+theme(axis.text.y = element_text(angle=0, size=10),legend.position = "none",title = element_text(size=12))+geom_label(fill="lightyellow", aes(label = paste(value,"M $")))+expand_limits(y=0)
+
+```
+
+Row {.tabset .tabset-fade data-width=600 data-height=900 .colored }
+------------------------------------------------------------------------------
+ 
+### Map 
+
+![Alliance_ Nissan and Renault](C:/Users/DellPC/Desktop/R_source_code/LSCM/map_1.png)
+
+
+```{r, fig.height=15,fig.width=20, include=FALSE}
+
+df<- data.frame (Country = c(rep("France",6),rep("Germany",6),rep("Japan",6),rep("United States",6)),Critical =c(rep("Power Distance",1),rep("Individualism",1),rep("Masculinity",1),rep("Uncertainty Avoidance",1),rep("Long Term Orientation",1),rep("Indulgence",1),rep("Power Distance",1),rep("Individualism",1),rep("Masculinity",1),rep("Uncertainty Avoidance",1),rep("Long Term Orientation",1),rep("Indulgence",1),rep("Power Distance",1),rep("Individualism",1),rep("Masculinity",1),rep("Uncertainty Avoidance",1),rep("Long Term Orientation",1),rep("Indulgence",1),rep("Power Distance",1),rep("Individualism",1),rep("Masculinity",1),rep("Uncertainty Avoidance",1),rep("Long Term Orientation",1),rep("Indulgence",1)),Value = c( 68,35,54,40,71,67,46,91,43,66,95,62,86,65,92,46,63,83,88,26,48,40,42,68))
+
+ggculture<-df%>% ggplot(aes(x= fct_reorder2(Critical, Country, -desc(Value)), y = Value, group = Country, label= Value))+geom_bar(stat="identity",aes(fill= Country),position = "stack")+scale_y_continuous(breaks=20*c(0:15))+theme_minimal()+ggsci::scale_fill_startrek()+labs(color="",x="",y="",title ="Geert Hofstede's Six Dimensions of Nation Culture France, Germany, Japan, and United States")+theme(axis.text.x = element_text(size=12),axis.text.y = element_text(size=12), title = element_text(size=15))
+```
+
+Culture
+=======================================================================
+
+Column {.colored }
+------------------------------------------------------------------------------
+
+### Culture
+
+```{r, fig.height=16,fig.width=20,echo=FALSE}
+
+ggplotly(ggculture)
+
+```
+
+
+Supplier_Tier&Alliance
+=======================================================================
+
+Column {.tabset .tabset-fade data-width=1000 .colored }
+------------------------------------------------------------------------------
+ 
+### Manufacture tier types
+
+![Alliance_ Nissan and Renault](C:/Users/DellPC/Desktop/R_source_code/LSCM/manufacture_tier.png)
+
+### Manufacture components
+
+![Manufacture_component](C:/Users/DellPC/Desktop/R_source_code/LSCM/graph1.jpeg)
+
+
+Export Advantage
+=======================================================================
+
+Column {.tabset .tabset-fade .colored }
+------------------------------------------------------------------------------
+
+
+### Europe
+
+![Europe_Export](C:/Users/DellPC/Desktop/R_source_code/LSCM/europe.jpg)
+
+
+### Japan
+
+
+![Japan_Export](C:/Users/DellPC/Desktop/R_source_code/LSCM/jp.jpg)
+
+
+
+
+Map Visualization
+=======================================================================
+
+
+Column {.tabset .tabset-fade data-width=200 .colored }
+------------------------------------------------------------------------------
+
+### Nissan Goal
+
+![Nissan](C:/Users/DellPC/Desktop/R_source_code/LSCM/Nissan.png)
+
+
+### Renault Goal
+
+![Renault](C:/Users/DellPC/Desktop/R_source_code/LSCM/Renault.png)
+
+
+### Alliance Goal
+
+![alliance](C:/Users/DellPC/Desktop/R_source_code/LSCM/alliance.png)
+
+
+
+Column {.tabset .tabset-fade data-width=800 .colored }
+------------------------------------------------------------------------------
+
+
+
+### Alliance  
+
+```{r, include=FALSE, warning=FALSE,message=FALSE}
+
+map <- data.frame(country=c("United States of America","United Kingdom","South Africa","Egypt","Kenya","Mexico","Brazil","Chile","France","Portugal","Spain","Slovenia","Russia","China","India","Thailand","Vietnam","Indonesia","Malaysia","Philippines","South Korea","Japan","Romania","Colombia","Argentina","Morocco","Turkey","Uruguay","Zimbabwe","Pakistan","Myanmar","Australia","Nigeria","Bangladesh","Algeria","Iran"), group=c(rep("Nissan_remain",5),rep("Cross Production",18),rep("Renault_remain",4),rep("No longer",3),rep("New product Nissan",3),rep("Misubishi plant",1),rep("New product Renault",2)))
+
+sort <- sort %>% mutate(group=rep("None of them",218))
+
+map<- bind_rows(map,sort)
+
+map <- map %>% mutate(value=1)
+
+map1<- map %>% filter(group == "Cross Production")
+map2<- map %>% filter(group == "Misubishi plant")
+map3<- map %>% filter(group == "New product Nissan")
+map4<- map %>% filter(group == "New product Renault")
+map5<- map %>% filter(group == "Nissan_remain")
+map6<- map %>% filter(group == "No longer")
+map7<- map %>% filter(group == "Renault_remain")
+map8<- map %>% filter(group == "None of them")
+
+map_data <- download_map_data("custom/world-robinson")
+
+```
+
+
+
+```{r, echo=FALSE, fig.align="center",fig.width= 1000, fig.height=1000}
+
+highchart(type="map")%>%hc_plotOptions(map = list(
+    allAreas = FALSE,
+    joinBy = c("name", "country"),
+    mapData = map_data
+)) %>% hc_add_series(name = "Manufacturing location of more than one partner or cross production", data = map1, color = "green") %>%
+               hc_add_series(name = "Misubishi production location", data = map2, color = "purple") %>%
+               hc_add_series(name = "New Production location of Nissan", data = map3, color = "blue") %>%
+               hc_add_series(name = "New Production location of Renault", data = map4, color = "orange") %>%
+               hc_add_series(name = "Remained Nissan production location", data = map5, color = "darkred") %>%
+               hc_add_series(name = "No longer production location", data = map6, color = "black") %>% hc_add_series(name =
+                                                                                                                     "Remained Renault production location", data = map7, color = "yellow")%>%
+               hc_add_series(name = "None of them", data = map8, color = "grey") %>% 
+    hc_title(text = "Nissan - Renault - Misubishi Alliance in all around the World") %>% 
+    hc_subtitle(text = "Map visualization differences between 2002 and 2009") %>%
+    hc_tooltip(borderWidth = 1.5, headerFormat = "", valueSuffix = " Location") 
+  
+
+```
+
+
+
+
+
