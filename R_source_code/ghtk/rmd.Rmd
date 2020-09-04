@@ -1,0 +1,102 @@
+---
+title: "Untitled"
+author: "Nguyen_LSCM"
+date: "5/2/2020"
+output:
+               flexdashboard::flex_dashboard:
+               theme: yeti
+               highlight: monochrome
+               df_print: paged
+               toc: true
+               number_sections: true
+               orientation: row
+---
+
+
+
+```{r,include=FALSE}
+library(readxl)
+library(tidyverse)
+library(leaflet)
+library(ggthemes)
+library(ggsci)
+library(plotly)
+library(RColorBrewer)
+library(ggrepel)
+library(flexdashboard)
+
+setwd("C:/Users/DellPC/Desktop/R_source_code/ghtk")
+main<- read_excel("main.xlsx")
+file<- read_excel("file.xlsx")
+
+colnames(main)<-c("buu_cuc","address","latitude","longitude")
+
+colnames(file)<-c("address","time","quantity")
+dt<- file%>%left_join(main,by="address")
+
+```
+
+<style>                     
+.navbar {
+  background-color:black;
+  border-color:black;
+}
+.navbar-brand {
+color:red!important;
+}
+</style> 
+
+
+
+
+Row {data-width = 500} 
+------------------------------------------------------------------
+
+### Time 
+
+```{r,echo=FALSE}
+gg<-dt%>%group_by(address)%>%summarise(time=mean(time))%>%ungroup()%>%mutate(address=fct_reorder(address,desc(time)))%>%ggplot(aes(x=address,y=time,fill=address,label=time))+geom_col()+theme_fivethirtyeight()+scale_fill_ucscgb()+geom_label_repel()+theme(legend.title = element_blank(),legend.position = "none")+coord_flip()+geom_hline(yintercept = mean(dt$time,color="red",lwd=1))
+gg
+
+```
+
+### Quantity
+
+```{r,echo=FALSE}
+
+gg<-dt%>%group_by(address)%>%summarise(quantity=mean(quantity))%>%ungroup()%>%mutate(address=fct_reorder(address,desc(quantity)))%>%ggplot(aes(x=address,y=quantity,fill=address,label=quantity))+geom_col()+theme_fivethirtyeight()+scale_fill_ucscgb()+geom_label_repel()+theme(legend.title = element_blank(),legend.position = "none")+coord_flip()+geom_hline(yintercept = mean(dt$quantity,color="red",lwd=1))
+
+gg
+
+
+```
+
+
+
+
+Row {data-width = 500}
+----------------------------------------------------------------------
+
+### Map 
+
+```{r, echo=FALSE}
+
+
+
+pal<-colorFactor(c("green","yellow","red","blue","black","cyan","pink","purple","palegreen","orange","steelblue"),domain = c("Ba Đình","Cầu Giấy","Đống Đa","Hà Đông","Hai Bà Trưng","Hoàn Kiếm","Hoàng Mai","Long Biên","Tây Hồ","Thanh Xuân","Từ Liêm"))
+
+leaflet() %>% addTiles() %>% addProviderTiles(providers$HikeBike) %>%
+    addProviderTiles(providers$Stamen.TonerLines,
+                     options = providerTileOptions(opacity = 0.35)) %>%
+    addProviderTiles(providers$Stamen.TonerLabels) %>% addCircleMarkers(
+        data = dt,
+        lng =  ~ longitude,
+        lat = ~ latitude,
+        label = ~ buu_cuc,
+        radius = ~ quantity/100,
+        color = "palegreen",
+        stroke = FALSE,
+        fillOpacity = 0.6
+    )%>%addPopups(data=dt,lng=~longitude,lat=~latitude,popup = ~address,options = popupOptions(closeOnClick = FALSE))  
+
+```
