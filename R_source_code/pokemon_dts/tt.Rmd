@@ -1,0 +1,49 @@
+---
+title: "medium_article"
+author: "Nguyen_LSCM"
+date: "4/8/2020"
+output: html_document
+---
+
+
+```{r }
+library(dplyr)
+library(readxl)
+library(wordcloud)
+library(wordcloud2)
+
+
+setwd("C:/Users/DellPC/Desktop/tt")
+
+stop_word<-read_excel("sw.xlsx")
+dictionary<-read_excel("dictionary.xlsx")
+
+```
+
+```{r}
+
+df<-dictionary%>%anti_join(stop_word)%>%select(-1)%>%filter(!is.na(word),!word %in% c("[","]","–","“"))
+      
+```
+
+#Cloud_with_html
+```{r}
+
+
+wordcloud2(df, size = 1, minSize = 0, gridSize =  0,
+           fontFamily = 'Segoe UI', fontWeight = 'bold',
+           color = 'random-dark', backgroundColor = "lightblue",
+           minRotation = -pi/4, maxRotation = pi/4, shuffle = TRUE,
+           rotateRatio = 0.8, shape = 'star', ellipticity = 0.65,
+           widgetsize = NULL, figPath = NULL, hoverFunction = NULL)
+
+
+
+```
+
+#Cloud_without_html
+```{r}
+
+df%>%with(wordcloud(words=word,freq = n/100,max.words = 100,colors = c(brewer.pal(8,"Set1"))))
+
+```
