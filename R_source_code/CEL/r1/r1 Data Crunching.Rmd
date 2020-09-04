@@ -1,0 +1,385 @@
+---
+title: "Data Crunching"
+author: "Nguyen_LSCM"
+date: "8/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load libraries
+
+```{r}
+
+suppressMessages(library(tidyverse))
+suppressMessages(library(reticulate))
+suppressMessages(library(lubridate))
+suppressMessages(library(readxl))
+suppressMessages(library(plotly))
+suppressMessages(library(leaflet))
+suppressMessages(library(leafpop))
+suppressMessages(library(patchwork))
+
+#set working directory
+
+setwd('C:/Users/DellPC/Desktop/Corner/R_source_code/CEL/r1')
+
+```
+
+# Load datasets
+
+```{r}
+
+# Read the master dataset
+
+customer <- read_excel('R1_CustomerMaster_Input.xlsx')
+product  <- read_excel('R1_ProductMaster_Input.xlsx')
+
+# Read so and to line dataset
+
+soline <- read_excel('R1_SOLine_Input.xlsx')
+toline <- read_excel('R1_TOLine_Input.xlsx')
+
+```
+
+Sort and filter for **customer dataset** dataset
+
+```{r}
+
+#Remove the replicate longitude and latitude
+
+cusId <- customer %>% 
+               add_count(Longitude, Latitude, sort = TRUE) %>% 
+               filter(n<2) %>% 
+               select(CusId)
+
+
+
+customer %>% add_count(Longitude, Latitude, sort = TRUE) %>% 
+               filter(n>1) %>%
+               filter(CusId %in% cusId$CusId )
+
+
+
+```
+
+Sort and filter for **soline** dataset
+
+
+```{r}
+
+#Check for CusId, ProductId and Dateformat in Soline 
+
+foo <- soline %>% filter(SoCustomerId %in% customer$CusId, SoProductId %in% product$ProductId) %>%
+               mutate(SoEnteredDate = as.Date(SoEnteredDate, format = '%Y-%m-%d'),
+                      SoExpectedDate = as.Date(SoExpectedDate, format = '%Y-%m-%d'))
+
+soline <- foo
+
+#Check for 
+
+foo <- toline %>% filter(ToCustomerId %in% customer$CusId, ToProductId %in% product$ProductId,
+                         SoOrderLineId %in% soline$SoOrderLineId) %>% 
+                  mutate(ToDeparturedDate = as.Date(ToDepartureDate, format = '%Y-%m-%d'),
+                      ToArrivalDate = as.Date(ToArrivalDate, format = '%Y-%m-%d'))
+
+toline <- foo
+
+
+```
+
+# Shipment by Customer Result
+
+```{r}
+
+cus_so <- customer %>% select(CusId) %>% 
+               left_join(soline, by = c('CusId' = 'SoCustomerId')) %>% 
+               na.omit() %>%
+               group_by(CusId) %>% 
+               summarise(TotalOrderedQuantityKg = sum(SoQuantity),
+                         NumberOfOrderNumber = n()
+                         ) %>%
+               mutate(AverageQuantityPerOrderKg = TotalOrderedQuantityKg / NumberOfOrderNumber)
+
+so_price <- soline %>% 
+               group_by(SoProductId) %>% 
+               summarise(price = mean(SoUnitCost))
+
+
+cus_to <- customer %>% select(CusId) %>%
+               left_join(toline, 
+                         by =c('CusId' = 'ToCustomerId')) %>%
+               na.omit() %>% 
+               left_join(so_price, 
+                         by =c('ToProductId' ='SoProductId')) %>%
+               mutate(SalesValue = price*ToQuantity) %>%
+               group_by(CusId) %>% 
+               summarise(TotalShippedQuantityKg = sum(ToQuantity),
+                         SalesValue = sum(SalesValue))
+
+cus_so_to <- cus_so %>% 
+               left_join(cus_to, by = 'CusId') %>% 
+               arrange(desc(SalesValue)) %>% 
+               mutate(CumulativeValueSharePercent = cumsum(SalesValue/ sum(SalesValue)),
+                      OrderFillRatePercent = TotalShippedQuantityKg/TotalOrderedQuantityKg) %>%
+               mutate(AbcClass = if_else(CumulativeValueSharePercent < 0.8, 'A',
+                                         if_else(CumulativeValueSharePercent > 0.95, 'C', 'B')))
+
+
+
+```
+
+# Shipment by Productgroup Result
+
+```{r}
+
+product_so <- product %>% select(ProductGroup, ProductId) %>% 
+               left_join(soline, by = c('ProductId' = 'SoProductId')) %>% 
+               na.omit() %>%
+               group_by(ProductGroup, ProductId) %>% 
+               summarise(TotalOrderedQuantityKg = sum(SoQuantity)) %>% ungroup() %>%
+               group_by(ProductGroup) %>% 
+               summarise(TotalOrderedQuantityKg = sum(TotalOrderedQuantityKg))
+                     
+
+so_price <- soline %>% 
+               group_by(SoProductId) %>% 
+               summarise(price = mean(SoUnitCost))
+
+product_to <- product %>% select(ProductGroup, ProductId) %>%
+               left_join(toline, 
+                         by =c('ProductId' = 'ToProductId')) %>%
+               na.omit() %>% 
+               left_join(so_price, 
+                         by =c('ProductId' ='SoProductId')) %>%
+               mutate(SalesValue = price*ToQuantity) %>%
+               group_by(ProductGroup, ProductId) %>% 
+               summarise(TotalShippedQuantityKg = sum(ToQuantity),
+                         SalesValue = sum(SalesValue)) %>% ungroup() %>%
+               group_by(ProductGroup) %>%
+               summarise(TotalShippedQuantityKg = sum(TotalShippedQuantityKg),
+                         SalesValue = sum(SalesValue))
+
+product_so_to <- product_so %>% 
+               left_join(product_to, by = 'ProductGroup') %>% 
+               mutate(OrderFillRatePercent = TotalShippedQuantityKg/TotalOrderedQuantityKg) 
+```
+
+# Transaction Summary Result
+
+```{r}
+
+df <- soline %>% select(SoProductId, SoQuantity, SoUnitCost) %>%
+               left_join(product %>% select(ProductId, KgPerCarton),
+                         by =c('SoProductId' = 'ProductId')) %>% 
+               select(SoProductId, KgPerCarton)
+
+so_summary <- soline %>% select(SoProductId, SoQuantity, SoUnitCost) %>%
+               left_join(df, by = c('SoProductId')) %>%
+               transmute(SoProductId = SoProductId,
+                         TotalValue = SoQuantity*SoUnitCost,
+                         QuantityCar = SoQuantity/KgPerCarton,
+                         SoQuantity = SoQuantity) %>%
+               group_by(SoProductId) %>%
+               summarise(SoQuantity = sum(SoQuantity), 
+                         TotalValue = sum(TotalValue),
+                         QuantityCar = sum(QuantityCar)) %>%
+               mutate( Summary = 'Sales Order') %>%
+               group_by(Summary) %>% 
+               summarise(WeightTon = sum(SoQuantity)/1000, 
+                         TotalValue = sum(TotalValue),
+                         QuantityCar = sum(QuantityCar))
+
+
+
+df <- toline %>% select(ToProductId, ToQuantity) %>%
+               left_join(product %>% select(ProductId, KgPerCarton),
+                         by =c('ToProductId' = 'ProductId')) %>% 
+               select(ToProductId, KgPerCarton) %>%
+               left_join(soline %>% select(SoProductId, SoUnitCost), 
+                         by = c('ToProductId' = 'SoProductId'))  %>%
+               group_by(ToProductId) %>%
+               summarise(KgPerCarton = mean(KgPerCarton),
+                         SoUnitCost = mean(SoUnitCost))
+
+to_summary <- toline %>% select(ToProductId, ToQuantity) %>%
+               left_join(df, by = c('ToProductId')) %>%
+               transmute(ToProductId = ToProductId,
+                         TotalValue = ToQuantity*SoUnitCost,
+                         QuantityCar = ToQuantity/KgPerCarton,
+                         ToQuantity = ToQuantity) %>%
+               group_by(ToProductId) %>%
+               summarise(ToQuantity = sum(ToQuantity), 
+                         TotalValue = sum(TotalValue),
+                         QuantityCar = sum(QuantityCar)) %>%
+               mutate( Summary = 'Transportation Order') %>%
+               group_by(Summary) %>% 
+               summarise(WeightTon = sum(ToQuantity)/1000, 
+                         TotalValue = sum(TotalValue),
+                         QuantityCar = sum(QuantityCar))
+
+transaction_summary <- bind_rows(so_summary, to_summary)
+
+
+```
+
+# Export files
+
+```{r}
+
+write_csv(customer, path = 'template/customer_master_result.csv')
+write_csv(product, path = 'template/product_master_result.csv' )
+write_csv(soline, path = 'template/sales_order_result.csv')
+write_csv(toline, path = 'template/transportation_order_result.csv')
+
+write_csv(cus_so_to, path = 'template/shipment_by_customer_result.csv')
+write_csv(product_so_to, path = 'template/shipment_by_productgroup_result.csv')
+write_csv(transaction_summary, path = 'transaction_summary_result.csv')
+
+```
+
+
+# Mine the Customer Master dataset
+
+```{r}
+
+library(leaflet)
+
+customer %>% leaflet() %>% 
+               addTiles() %>% addProviderTiles(provider = providers$OpenStreetMap.DE) %>%
+               addProviderTiles((provider = providers$TomTom.Labels)) %>%
+               addCircleMarkers(lng = ~Longitude, lat =~ Latitude, label = ~CusId, color = 'darkred')
+
+
+
+```
+
+# Mine the Product Master dataset
+
+```{r}
+
+gg <- ggplot(data =  product, aes(y = fct_reorder(Name, -KgPerCarton))) +
+               geom_bar(stat='identity', aes(x= KgPerCarton ,fill = ProductGroup))  + 
+               geom_text(data = product, aes(x = KgPerCarton/2, label = KgPerCarton), 
+                         color ='white', fontface = 'bold' ) +
+               labs(title = 'KgPerPallet for each Product', x = 'Product Group', y ='KgPerCaton') +
+               scale_fill_manual(values = c('red', 'steelblue', 'green')) +
+               theme_bw()
+
+ggplotly(gg)
+
+```
+
+
+```{r}
+library(reticulate)
+
+```
+
+```{python}
+
+import plotly.express as px
+import plotly.graph_objs as go
+import plotly.offline as pyo
+
+```
+
+```{python}
+
+df = r.product
+
+fig = px.sunburst(df, path = ['ProductGroup', 'Name'], values = 'KgPerCarton',
+                  color=df['KgPerCarton'],
+                  color_continuous_scale = 'orrd')
+                  
+
+fig.update_layout(title = 'Product Summary', title_x = 0.5)
+
+pyo.plot(fig, filename='Product_summary.html', auto_open=False)
+
+```
+
+
+
+
+```{r}
+
+htmltools::includeHTML('Product_summary.html')
+
+```
+
+# Customer summary mining
+
+```{r}
+
+map_df <- cus_so_to %>% select(CusId, SalesValue, 
+                               OrderFillRatePercent, AbcClass) %>%
+               left_join(customer %>% 
+                                        select(CusId, Longitude, Latitude), by = 'CusId') 
+
+
+pal<-colorFactor(c('red', 'steelblue', 'palegreen'),domain = c("A","B","C"))
+
+map_df %>% leaflet() %>% addTiles() %>% 
+               addProviderTiles(provider = providers$OpenStreetMap) %>%
+               addProviderTiles(provider = providers$Stamen.TonerLabels) %>% 
+               addCircleMarkers(data =map_df ,lng = ~Longitude, lat = ~Latitude,
+                                                         color = ~pal(AbcClass),
+                                                         fillOpacity = 0.5,
+                                                         popup =  leafpop::popupTable(map_df,
+                                              feature.id = FALSE,
+                                              row.numbers = FALSE,
+                                              zcol=c('SalesValue', 'OrderFillRatePercent', 'AbcClass')),
+                                                         radius = ~log(SalesValue))
+
+```
+
+
+# ProductGroup summary mining
+
+```{r}
+
+product_df <- product_so_to %>% pivot_longer(cols = c('TotalOrderedQuantityKg', 'TotalShippedQuantityKg'),
+                                              names_to = 'ordered_shipped',
+                                             values_to = 'quantity')
+
+p1 <- product_df %>% ggplot(aes(x = ProductGroup)) + 
+               geom_bar(data = product_df, aes(y = SalesValue, fill = ProductGroup),
+                        stat = 'identity', show.legend = FALSE) + 
+               labs(title = 'Sales Value for each Product group',
+                    x = 'Product Group', y ='Sales Value') +
+               theme_light()
+           
+
+p1
+  
+
+p2 <-   product_so_to %>% ggplot(aes(x = ProductGroup, y = OrderFillRatePercent)) + 
+               geom_line(aes(group = 1), lwd =2, color = 'cyan4') + 
+               geom_point(aes(color = ProductGroup), size = 8)+
+               labs(title = 'OrderFillRatePercent for each Product Group', 
+                    x = ' ProductGroup' , y ='OrderFillRatePercent') +
+               coord_polar() + theme_light()
+
+
+p2
+             
+
+p3 <-  product_df %>% ggplot(aes(x = ProductGroup, label = quantity)) + 
+               geom_bar(data = product_df, aes(y = quantity, fill = ordered_shipped),
+                        stat = 'identity', position = 'dodge', alpha = 0.8) +
+               labs(title = 'Ordered and Shipped Quantity for each Product group  ',
+                    x = 'Product Group', y ='Sales Value', legend = F) +
+               scale_fill_manual(values = c('darkred', 'lightgreen')) +
+               theme_light()
+
+p3
+
+layout = 'AABB
+          CCCC'
+
+p1 + p2 +p3 + plot_layout(design = layout)
+               
+```

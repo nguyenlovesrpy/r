@@ -1,0 +1,20 @@
+ProductId,ProductGroup,Name,KgPerCarton,CartonsPerPallet,KgPerPallet,SalesUnit,SupplierUnit
+SKU01,Fruits,Strawberry,3,250,750,Kg,Car
+SKU02,Fruits,Mango,12.336,75,925.2,Kg,Car
+SKU03,Rice,Jasmine Rice,3,250,750,Kg,Car
+SKU04,Vegetables,Potato,1.884,456,859.104,Kg,Car
+SKU05,Vegetables,Tomato,4.32,96,414.72,Kg,Car
+SKU06,Vegetables,Salad,6.27,136,852.72,Kg,Kg
+SKU07,Vegetables,Corn,2.8,96,268.8,Kg,Kg
+SKU08,Fruits,Peanuts,6.24,125,780,Kg,Kg
+SKU09,Fruits,Durian,5.04,160,806.4,Kg,Kg
+SKU10,Fruits,Rambutant,6.3,136,856.8,Kg,Kg
+SKU11,Fruits,Pomelo,1.872,456,853.632,Kg,Kg
+SKU12,Fruits,Coconut,1.848,456,842.688,Kg,Kg
+SKU14,Fruits,Banana,5.94,78,463.32,Kg,Kg
+SKU15,Fruits,Jackfruit,4.32,96,414.72,Kg,Kg
+SKU16,Fruits,Tangerine,12.552,75,0.16735999999999998,Kg,Kg
+SKU17,Fruits,Grape,4.32,96,414.72,Kg,Kg
+SKU18,Fruits,Watermelon,2.25,66,148.5,Kg,Kg
+SKU19,Fruits,Orange,6,90,540,Kg,Kg
+SKU20,Fruits,Apple,10,51,510,Kg,Kg
