@@ -1,0 +1,267 @@
+---
+title: "Brazillian Ecommerce"
+author: "Nguyen"
+date: "3/16/2020"
+output:
+  html_document: default
+
+---
+
+# Prepare and set up 
+
+
+```{r echo=FALSE}
+#Load working directory
+setwd("C:/Users/DellPC/Desktop/brazilian-ecommerce")
+
+#Load packages
+suppressMessages(library(tidyverse))
+suppressMessages(library(dplyr))
+suppressMessages(library(scales))
+suppressMessages(library(plotly))
+suppressMessages(library(RColorBrewer))
+suppressMessages(library(viridis))
+suppressMessages(library(DT))
+suppressMessages(library(ggsci))
+suppressMessages(library(ggthemes))
+suppressMessages(library(ggrepel))
+suppressMessages(library(leaflet))
+suppressMessages(library(crosstalk))
+suppressMessages(library(gridExtra))
+suppressMessages(library(patchwork))
+
+
+
+theme_set(theme_minimal())
+
+#Load datasets
+olist_customers_dataset<- read.csv("olist_customers_dataset.csv")
+olist_geolocation_dataset<- read.csv("olist_geolocation_dataset.csv")
+olist_order_items_dataset<-read.csv("olist_order_items_dataset.csv")
+olist_order_payments_dataset<-read.csv("olist_order_payments_dataset.csv")
+olist_order_reviews_dataset<-read.csv("olist_order_reviews_dataset.csv")
+olist_orders_dataset<-read.csv("olist_orders_dataset.csv")
+olist_products_dataset<-read.csv("olist_products_dataset.csv")
+olist_sellers_dataset<-read.csv("olist_sellers_dataset.csv")
+product_category_name_translation<-read.csv("product_category_name_translation.csv")
+
+#Rename datasets
+cus<- olist_customers_dataset
+geo<- olist_geolocation_dataset
+item<- olist_order_items_dataset
+payment<- olist_order_payments_dataset
+review<- olist_order_reviews_dataset
+order<-olist_orders_dataset
+pro_dt<-olist_products_dataset
+seller<-olist_sellers_dataset
+product_cat_tran<-product_category_name_translation
+
+```
+# Customer Master
+```{r echo=FALSE}
+#Count the userid in each city
+
+
+pal <-
+               c(brewer.pal(9, "Set1"),
+                 brewer.pal(9, "YlOrRd"),
+                 brewer.pal(12, "Set3"))
+
+city_process <-
+               cus %>% mutate(customer_city = fct_lump(customer_city, 29)) %>% group_by(customer_city) %>%
+               summarise(number = n()) %>% mutate(customer_city = str_to_title(customer_city)) %>%
+               mutate(customer_city = fct_reorder(customer_city, desc(number)))
+
+city_plot <-
+               city_process %>% ggplot(aes(x = fct_reorder(customer_city, desc(number)), y =
+                                                          number,color="white")) + geom_col(aes(fill = customer_city)) + scale_fill_manual(values = pal) +
+               coord_flip() + scale_y_continuous(breaks = 5000 * c(1:20)) + labs(title  =
+                                                                                                ("Stastics the number of customer in many cities")) + xlab("Customer City") +
+               ylab("Number of Customer in each City") + theme(legend.position = "bottom")+theme(axis.text.x = element_blank())
+
+gg<-ggplotly(city_plot)
+
+gg
+```
+
+We can see that Sao Paolo and Rio De Janeiro is the top rate of customer users, then it is just decreasing marginally. 
+It is easy to know the Olist customers stay centrally in large cities. But the range of place is quite wide
+
+
+```{r echo=FALSE}
+#Count the userid in some cities in each state
+
+state_process <-
+               cus %>% group_by(customer_state,customer_city) %>%
+               summarise(number = n()) %>%ungroup()%>% mutate(customer_city = str_to_title(customer_city),customer_state=str_to_title(customer_state)) %>%
+               mutate(customer_city = fct_reorder(customer_city, desc(number)))
+
+state_plot<- state_process%>%ggplot(aes(x=customer_city,y=number,fill=customer_state))+geom_col()
+gg<- ggplotly(state_plot, dynamicstick=TRUE)
+
+gg
+
+dt=highlight_key(state_process)
+
+filter<-filter_select("Customer States", group=~customer_state,sharedData = dt, multiple = TRUE,label = "The interactive graph that show the cities in each state")
+
+bscols(filter, gg, widths = c(12, 12))
+
+#Graph without touching
+
+state_process <-
+               cus %>% group_by(customer_state) %>%
+               summarise(number = n()) %>% ungroup() %>% mutate(customer_state =
+                                                                               str_to_upper(customer_state)) %>%
+               mutate(customer_state = fct_reorder(customer_state, desc(number)))
+
+pal<- c(brewer.pal(9,"YlGnBu"),brewer.pal(9,"YlOrBr"),brewer.pal(9,"YlOrRd"))
+
+
+state_plot <-
+               state_process %>% ggplot(aes(
+                              x = fct_reorder(customer_state, number),
+                              y = number,fill = customer_state,
+                              color = "white"
+                              
+               )) + geom_col()+scale_fill_manual(values = pal)+xlab("State")+ylab("Number of userid")
+
+gg <- ggplotly(state_plot, dynamicstick = TRUE)
+       
+```
+
+The geom_col makes me think that the state scope is the same as cities scope. The top places are Sp, Rj, Mg. Especially, Mg mightbe have many sub cities, Likewise, Sp and Rj are centralized 
+
+# Geolocation
+```{r echo=FALSE}
+geom <- geo %>% mutate(geolocation_city = str_to_title(geolocation_city))
+
+geom<-geom %>% group_by(geolocation_state) %>% summarise(
+               number = n(),
+               geolocation_lng = mean(geolocation_lng),
+               geolocation_lat = mean(geolocation_lat)
+) %>% mutate(class = ifelse(number<1500,"Small",ifelse(number>1500 & number<7500,"Medium",ifelse(number>50000,"Very Large","Large")))) %>% mutate(popup= paste( geolocation_state,"-",class,sep=""))
+
+geom%>% leaflet() %>% addTiles() %>% addCircleMarkers(label = ~popup,
+               lng =  ~ geolocation_lng,
+               lat =  ~ geolocation_lat,
+               color = "red"
+) %>% addPopups(
+               lng =  ~ geolocation_lng,
+               lat =  ~ geolocation_lat,
+               popup =~popup,
+               options = popupOptions(closeOnClick = FALSE)
+) %>% addProviderTiles(provider = providers$Stamen.TonerLabels) %>% addProviderTiles(provider = providers$Stamen.TonerLines)
+
+
+
+```
+
+Userids are all arould the Brazil, Three points such as (MG,RJ,SP) are nearly. Therefore; Logistics hubs maybe stay cluster and very high density in this place. 
+
+From this interactive graph, we can easily realize that
+
+In size aspect: There are 4 groups: small-medium-large-very large.
+In location aspect: There are 4 cluster locations: The very large + Large Cluster, Medium+large cluster, 2 Medium objects in central cluster and 3 poits with small sizes
+
+So We conclude that the logistics serivces play a key role in E-commerce coverage. Maybe, Because of cost, there are many points in 1 place. But in some areas, There are some except cases, This is a signal that there is a complete in ecommerce market, So Olist decides to expand more and more their coverage place around Brazil
+
+# Order datasets
+
+## Order status
+
+```{r, fig.cap="Figure 1, fig.height=10,fig.weight=10}
+
+"Each customerid has only one orderid in this order datasets
+Orderid and CustomerId is unique, without more than second time"
+
+gg <-
+               order %>% group_by(order_status) %>% count() %>% arrange(n) %>% mutate(log_scale =
+                                                                                                     log10(n)) %>% ungroup()%>%mutate(order_status = fct_reorder(str_to_upper(order_status), log_scale)) %>% ggplot(aes(
+                                                                                                                    x = order_status,
+                                                                                                                    y = log_scale,
+                                                                                                                    fill = order_status,
+                                                                                                                    label = n,
+                                                                                                                    color = "white"
+                                                                                                     )) + geom_col() + scale_fill_manual(values = brewer.pal(8, "Reds")) +
+                guides(guide_legend(reverse = TRUE))+xlab("Order Status")+ylab("Log10 Scale")+labs(title=" The statistics of order status")+theme(legend.title =element_blank(),legend.text = element_blank())
+
+ggplotly(gg)
+
+
+```
+
+## Leadtime
+
+### Leadtime in total
+
+```{r, echo=FALSE}
+
+order_process <- order %>% transmute(
+               order_purchase = as.POSIXct(order_purchase_timestamp, format = "%Y-%m-%d %H:%M:%S"),
+               order_approved = as.POSIXct(order_approved_at, format = "%Y-%m-%d %H:%M:%S"),
+               order_delivered_carrier = as.POSIXct(order_delivered_carrier_date, format = "%Y-%m-%d %H:%M:%S"),
+               order_delivered_customer = as.POSIXct(order_delivered_customer_date, format =
+                                                                    "%Y-%m-%d %H:%M:%S"),
+               order_estimated_delivery = as.POSIXct(order_estimated_delivery_date, format =
+                                                                    "%Y-%m-%d %H:%M:%S")
+)%>%drop_na()
+
+order_process<-order_process %>% transmute(
+    diff_total = as.numeric(order_delivered_customer - order_purchase),
+    diff_approved_purchase =as.numeric(order_approved - order_purchase),
+    diff_deliver_carrier_approved = as.numeric(order_delivered_carrier - order_approved),
+    diff_delive_customer_carrier = as.numeric(order_delivered_customer - order_delivered_carrier),
+    diff_exp_real = as.numeric(order_estimated_delivery - order_delivered_customer
+))
+ 
+p1<-order_process%>%ggplot(aes(x=diff_total,alpha=0.5))+geom_density(fill="red")+labs(title="Diff_total")
+
+p2<- order_process%>% ggplot(aes(x=diff_approved_purchase,alpha=0.5))+geom_density(fill="green")+labs(title="Diff_aprroved_purchase")
+
+p3<- order_process%>% ggplot(aes(x=diff_deliver_carrier_approved,alpha=0.5))+geom_density(fill="blue")+labs(title="Diff_deliver_carrier_approved")
+
+p4<-order_process%>% ggplot(aes(x=diff_delive_customer_carrier,alpha=0.5))+geom_density(fill="yellow")+labs(title="Diff_deliver_customer_carrier")
+
+p5<-order_process%>% ggplot(aes(x=diff_exp_real,alpha=0.5))+geom_density(fill="grey")+labs(title="Diff_exp_real")
+
+p1/p2/p3/p4/p5
+
+ggplotly(p1)
+ggplotly(p2)
+ggplotly(p3)
+ggplotly(p4)
+ggplotly(p5)
+
+
+
+
+```
+
+Time for delivery from carrier to customer most common is 12 day shipment
+Zero is for among  approved, purchase and  carrier interval
+Expectation is higher, but more shape like a  belt
+Time for total processes is common in 7 days, but more shape into right directions.
+
+# Products
+```{r}
+
+pro_dt[,-c(1:5)]%>%pivot_longer(starts_with("product_"),names_to = "Product_dimension",values_to = "value")%>%ggplot(aes(x=Product_dimension,y=value,fill=Product_dimension))+geom_boxplot()
+
+payment%>%group_by(payment_type)%>%count()%>%arrange(desc(n))%>%datatable()
+payment %>%ggplot(aes(x=payment_type,y=payment_value,fill=payment_type))+geom_boxplot()
+
+gg<-seller%>%group_by(seller_state)%>%count()%>%arrange(desc(n))%>%ggplot(aes(x=fct_reorder(seller_state,n),y=n))+geom_col(aes(fill=seller_state))
+
+ggplotly(gg)
+
+```
+Dimensions are very different
+
+
+Most payments are Credit card and boleto and Debit card
+The value is very large difference amongmany payment type
+These places have many customers as well as more sellers
+
+
+
