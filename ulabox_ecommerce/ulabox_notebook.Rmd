@@ -1,0 +1,221 @@
+---
+title: "Ulabox_ecommerce"
+author: "Nguyen_LSCM"
+date: "3/24/2020"
+output: "html_document"
+---
+
+
+# Load packages
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+
+suppressMessages(library(tidyverse))
+suppressMessages(library(scales))
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(plotly))
+suppressMessages(library(lubridate))
+suppressMessages(library(crosstalk))
+suppressMessages(library(DT))
+suppressMessages(library(Amelia))
+suppressMessages(library(RColorBrewer))
+suppressMessages(library(kableExtra))
+suppressMessages(library(patchwork))
+suppressMessages(library(viridis))
+suppressMessages(library(ggsci))
+suppressMessages(library(gridExtra))
+suppressMessages(library(purrr))
+suppressMessages(library(NbClust))
+suppressMessages(library(factoextra))
+
+
+
+theme_set(theme_minimal())
+
+```
+
+# Introduction 
+
+- **Ulabox** is a Spainish start-up. The range of products is mainly focus on packaged foods,So it is easy to understand that supply chain is the key to compete with others, such as Amazon,...
+Ulabox has opened 3 warehouses: 2  in Barcelona and 1 Madrid. Fresh food like fish, vegetable and household items are core value of Ulabox to compete with giant Amazon. Nearly, It has coporated with other businesses. Widen products to have more energies and widen customers is a recent strategy of Ulabox.
+
+- If you want to know more, please to feel free with seaching this link [Ulabox](https://businesslogisticsupf.wordpress.com/2016/11/26/fresh-the-ulabox-and-comprea-weapon-to-stop-amazon/)
+
+- I also did other ecommerce in [notebook](https://www.kaggle.com/mybesttry/sc-in-ecommerce-quick-look). It is a Olist ecommerce from Brazil, operating model is different from Ulabox.
+
+
+# Load datasets
+
+
+```{r, warning=FALSE,message=FALSE, echo=FALSE}
+
+#Set up working directory
+
+setwd("C:/Users/DellPC/Desktop/ecommerce/ulabox_ecommerce")
+
+ulabox<- read.csv("ulabox.csv",header=TRUE)
+
+```
+
+
+# View datasets and explain
+
+
+- *Customer*: It likes a customerid to determine unique objective
+- *Order*: It likes a orderid to determine unique objective
+- *Total_Item*: The number of products that customer places an order in one time
+- *Discount*: This is an percentage of value order,it means that the ratio of discount value and order value
+- *Weekday*: The days are from Monday to Sunday. For example, 1 is Monday and 7 is Sunday
+- *hour*: The hours are from 0-23
+- *food, fresh, drinks, home, beauty,baby and pets*: are the products of Ulabox platform
+
+
+```{r, warning=FALSE,message=FALSE, echo=FALSE,fig.align="center"}
+
+ulabox %>%head(30)%>%kable()%>%kable_styling()
+
+```
+
+# Data Analysis {.tabset .tabset-fade .tabset-pills}
+
+I will cover some aspects below:
+- 1. Time aspect
+- 2. Product aspect
+- 3. Order times, discount 
+
+## Time aspect
+
+Distribution of Hour and Weekday
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+
+gg1<- ulabox%>% ggplot(aes(x=hour,y=..density..))+geom_histogram(bins=40,fill="darkorchid",color="white")+geom_density(fill="green",color="red",alpha=0.6,lwd=1)+xlab("Hour")+ylab("Density")+labs(title="Distribution of Hour")+scale_x_continuous(breaks = 2*c(1:12))
+
+ggplotly(gg1)
+
+gg2<- ulabox%>% ggplot(aes(x=weekday,y=..density..))+geom_histogram(bins=40,fill="darkred",color="white")+geom_density(fill="green",color="red",alpha=0.6,lwd=1)+xlab("Weekday")+ylab("Density")+labs(title="Distribution of Weekday")+scale_x_continuous(breaks = c(1:7))
+
+ggplotly(gg2)
+
+grid.arrange(gg1,gg2,ncol=1)
+
+
+
+
+
+```
+
+1. Hour aspect
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+
+
+
+pal<- c(brewer.pal(12,"Set3"),brewer.pal(9,"GnBu"),brewer.pal(3,"OrRd"))
+
+mean_hour<- ulabox%>%group_by(hour)%>%summarise(count_number=n())
+
+gg<-ulabox%>%group_by(hour)%>%summarise(count_number=n())%>%ggplot(aes(x=fct_reorder(factor(hour),desc(count_number)),y=count_number))+geom_col(aes(fill=factor(hour)))+scale_fill_manual(values = pal)+coord_flip()+xlab("Hour")+ylab("Frequency_Count")+labs("The frequency in each hour of a day")+expand_limits(y=0)+geom_hline(yintercept = mean(mean_hour$count_number),color="red")+theme(legend.title = element_blank())
+
+ggplotly(gg)
+
+```
+
+2. Weekday aspect
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+
+pal<- c(brewer.pal(12,"Set3"),brewer.pal(9,"GnBu"),brewer.pal(3,"OrRd"))
+mean_weekday<- ulabox%>%group_by(weekday)%>%summarise(count_number=n())
+
+
+gg<-ulabox%>%group_by(weekday)%>%summarise(count_number=n())%>%ggplot(aes(x=fct_reorder(factor(weekday),desc(count_number)),y=count_number))+geom_col(aes(fill=factor(weekday)))+coord_flip()+xlab("Weekday")+ylab("Frequency_Count")+labs("The frequency in each weekday of a week")+expand_limits(y=0)+theme(legend.title = element_blank())+geom_hline(yintercept = mean(mean_weekday$count_number),color="red")+ggsci::scale_fill_tron()
+
+ggplotly(gg)
+
+```
+
+3. Weekday compared to Hour aspect
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+
+
+
+gg<-ulabox%>%group_by(weekday,hour)%>%summarise(count_number=n())%>%ggplot(aes(x=weekday,y=hour))+geom_tile(aes(fill=count_number))+scale_fill_viridis(discrete = FALSE,option="D")+theme(legend.title = element_blank())+xlab("Weekday")+ylab("Hour")+labs(title="The Density of Hour versus Weekday")+scale_x_continuous(breaks = c(1:7))+scale_y_continuous(breaks=3*c(1:8))
+
+ggplotly(gg)
+
+```
+
+## Product aspect
+
+Distribution of range of products
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+
+gg1<- ulabox%>% ggplot(aes(x=food,y=..density..))+geom_histogram(bins=40,fill="darkorchid",color="white")+geom_density(fill="green",color="red",alpha=0.6,lwd=1)+xlab("Food")+ylab("Density")+labs(title="Distribution of Food")
+ggplotly(gg1)
+
+gg2<- ulabox%>% ggplot(aes(x=fresh,y=..density..))+geom_histogram(bins=40,fill="darkorchid",color="white")+geom_density(fill="green",color="red",alpha=0.6,lwd=1)+xlab("fresh")+ylab("Density")+labs(title="Distribution of Fresh")
+ggplotly(gg2)
+
+gg3<- ulabox%>% ggplot(aes(x=drinks,y=..density..))+geom_histogram(bins=40,fill="darkorchid",color="white")+geom_density(fill="green",color="red",alpha=0.6,lwd=1)+xlab("drinks")+ylab("Density")+labs(title="Distribution of drinks")
+ggplotly(gg3)
+
+gg4<- ulabox%>% ggplot(aes(x=home,y=..density..))+geom_histogram(bins=40,fill="darkorchid",color="white")+geom_density(fill="green",color="red",alpha=0.6,lwd=1)+xlab("home")+ylab("Density")+labs(title="Distribution of home")
+ggplotly(gg4)
+
+gg5<- ulabox%>% ggplot(aes(x=beauty,y=..density..))+geom_histogram(bins=40,fill="darkorchid",color="white")+geom_density(fill="green",color="red",alpha=0.6,lwd=1)+xlab("beauty")+ylab("Density")+labs(title="Distribution of beauty")
+ggplotly(gg5)
+
+gg6<- ulabox%>% ggplot(aes(x=health,y=..density..))+geom_histogram(bins=40,fill="darkorchid",color="white")+geom_density(fill="green",color="red",alpha=0.6,lwd=1)+xlab("health")+ylab("Density")+labs(title="Distribution of health")
+ggplotly(gg6)
+
+gg7<- ulabox%>% ggplot(aes(x=baby,y=..density..))+geom_histogram(bins=40,fill="darkorchid",color="white")+geom_density(fill="green",color="red",alpha=0.6,lwd=1)+xlab("baby")+ylab("Density")+labs(title="Distribution of baby")
+ggplotly(gg7)
+
+gg8<- ulabox%>% ggplot(aes(x=pets,y=..density..))+geom_histogram(bins=40,fill="darkorchid",color="white")+geom_density(fill="green",color="red",alpha=0.6,lwd=1)+xlab("pets")+ylab("Density")+labs(title="Distribution of pets")
+ggplotly(gg8)
+
+grid.arrange(gg1,gg2,gg3,gg4,nrow=2)
+grid.arrange(gg5,gg6,gg7,gg8,nrow=2)
+
+```
+
+Boxplot
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+
+gg1<- ulabox%>% ggplot(aes(y=food ))+geom_boxplot(fill="darkorchid",color="white")+xlab("Food") +labs(title="Boxplot of Food")
+ggplotly(gg1)
+
+gg2<- ulabox%>% ggplot(aes(y=fresh ))+geom_boxplot(fill="darkorchid",color="white")+xlab("fresh") +labs(title="Boxplot of Fresh")
+ggplotly(gg2)
+
+gg3<- ulabox%>% ggplot(aes(y=drinks ))+geom_boxplot(fill="darkorchid",color="white")+xlab("drinks") +labs(title="Boxplot of drinks")
+ggplotly(gg3)
+
+gg4<- ulabox%>% ggplot(aes(y=home ))+geom_boxplot(fill="darkorchid",color="white")+xlab("home") +labs(title="Boxplot of home")
+ggplotly(gg4)
+
+gg5<- ulabox%>% ggplot(aes(y=beauty ))+geom_boxplot(fill="darkorchid",color="white")+xlab("beauty") +labs(title="Boxplot of beauty")
+ggplotly(gg5)
+
+gg6<- ulabox%>% ggplot(aes(y=health ))+geom_boxplot(fill="darkorchid",color="white")+labs(title="Boxplot of health")
+ggplotly(gg6)
+
+gg7<- ulabox%>% ggplot(aes(y=baby ))+geom_boxplot(fill="darkorchid",color="white")+xlab("baby") +labs(title="Boxplot of baby")
+ggplotly(gg7)
+
+gg8<- ulabox%>% ggplot(aes(y=pets ))+geom_boxplot(fill="darkorchid",color="white")+xlab("pets") +labs(title="Boxplot of pets")
+ggplotly(gg8)
+
+grid.arrange(gg1,gg2,gg3,gg4,nrow=2)
+grid.arrange(gg5,gg6,gg7,gg8,nrow=2)
+
+```
+
+
+
+

@@ -1,0 +1,73 @@
+At least 1 year of industry experience in Business Intelligence or Data Analyst role with proven business impact
+Experience working with cross-functional teams to gather requirements and define the right metrics to describe the state of the business - both on a macro-level and a micro-level
+Passion for creating highly usable and thorough dashboards/visualizations
+Strong analytical thinking and ability to learn quickly with can do attitude
+Advance Excel skill with knowledge in Power Query, Power Pivots
+Experience in mySQL is compulsory
+Knowing statistical programming language (Python, R) to manipulate and draw insights from large data set is a plus
+Excellence written and verbal communication skills in English and Vietnamese
+University graduate with a relevant bachelor degree
+Analytical and quantitative skills; ability to prepare data and metrics to back up
+Entrepreneurial spirit, Self-motivated and independent learner
+Humble, willing to learn and show adaptability
+Excellent organizational and prioritization skills
+Good knowledge of English language and of Microsoft Office suite (Word, Excel, PowerPoint)
+Can work FULL - TIME in 3 months
+Bachelor's degree in Computer Science, Engineering or Information Technology or related field preferred
+Minimum 5 years' of relevant experience operating in a similar role
+Strong network knowledge and hand-on experience in Paolo Alto firewalls, and other network appliances (Cisco CCNA/CCNP is a plus)
+Able to configure and optimize monitoring systems for all network devices and services
+Windows/Linux server administration experience is required
+Rich experience is providing and operating enterprise services such as Active Directory, VPN, Wireless network, NAS, etc.
+Solid experience of configuring and operating VMware and HyperV products
+Initiative, enthusiasm and willingness to learn in a fluid and fast-paced environment
+Has passion for technology and wants to make a difference with technology solutions
+3 years experience as a DevOps Engineer or similar software engineering roles
+Experience with configuration and deployment management tools
+Experience in a public facing high-traffic environment
+Understanding of Linux / Unix system & command line interface
+Good knowledge of Go/Python
+Working knowledge of databases and SQL
+In-depth experience of Google Cloud Platform
+Google Cloud certification is a plus
+Problem-solving attitude
+Team spirit
+Google Cloud Platform
+Linux / Unix OS
+Knowledge of network & security
+Coding and Shell scripting
+Database tuning & debugging
+Understanding of Major DevOps Tools: Ansible, Docker, Kubernetes, Puppet, Chef, GitLab, Istio, ELK, Jenkins, CI/CD tool....
+At least 2 years in software testing
+Strong in functional/ non-functional testing:
+Test technique: Equivalence partitioning, Boundary value, Decision table, generate test cases from use cases.
+Have adhoc-testing skills.
+Experience in Performance and Security testing is a plus.
+Experience in Web, mobile testing and API testing.
+Able to perform all phases in the test process (analyze requirement, create test plan/ test cases/ test reports, …)
+Programming experience in at least one modern programming language such as Python, Java, C++ or C#.
+Familiarity with automated testing tools and frameworks for client-server application is plus.
+Experience in writing code to test UIs, APIs, front-end systems is plus
+Experience in technical problem solving; root cause analysis; and data gathering, analysis, and reporting within a system/ software quality assurance discipline.
+Process strong analytical skills, with excellent problem-solving abilities
+Strong in Database queries.
+Understanding of Scrum software development methodology with practices including continuous integration and TDD.
+Learn new techniques and technologies quickly.
+Min 1 year experience in analytical role / stakeholder management
+Good degree from recognized university
+Proficiency in Excel
+Have a strong affinity for critical thinking, hands-on execution, problem solving, and result-orientation
+Strong stakeholder management skills
+Good team player with can-do attitude
+Passion to work in a fast-paced, ambiguous startup environment
+At least > 1-year working experience in E-commerce is a plus (or related to E-commerce industry)
+Have basic knowledge in seller in E-commerce platforms
+Experience as sales/telesales is preferred
+Nimble, agile, able to nurture relationships with sellers and to handle the job effectively
+Proactively learn on the job, not afraid to suffer from hardship
+Diplomatic and negotiation ability
+Logical thinking and strong problem-solving skills
+Excellent written, verbal, non-verbal communication skills
+KPI-driven attitude and eagerness to adapt to the dynamic sales environment of e-commerce
+
+

@@ -1,0 +1,58 @@
+---
+title: "VN e-commerce"
+author: "NguyenLSCM"
+output: 
+               flexdashboard::flex_dashboard:
+               theme: readable
+---
+<style>                     
+.navbar {
+  background-color:red;
+  border-color:black;
+}
+.navbar-brand {
+color:black!important;
+}
+</style>                    
+
+
+```{r}
+library(dygraphs)
+library(dplyr)
+library(lubridate)
+library(scales)
+library(xts)
+
+```
+
+```{r}
+
+setwd("C:/Users/DellPC/Desktop")
+
+tiki<-read.csv("tiki.csv")%>%mutate(name="tiki")%>% mutate(date=as.Date(date,format="%m/%d/%Y"))
+sendo<-read.csv("sendo.csv")%>%mutate(name="sendo")%>% mutate(date=as.Date(date,format="%m/%d/%Y"))
+shopee<-read.csv("shopee.csv")%>%mutate(name="shopee")%>% mutate(date=as.Date(date,format="%m/%d/%Y"))
+lazada<-read.csv("lazada.csv")%>%mutate(name="lazada")%>% mutate(date=as.Date(date,format="%m/%d/%Y"))
+
+
+
+tiki<-xts(x=tiki$n,order.by = as.Date(tiki$date))
+sendo<-xts(x=sendo$n,order.by = as.Date(sendo$date))
+lazada<-xts(x=lazada$n,order.by = as.Date(lazada$date))
+shopee<-xts(x=shopee$n,order.by = as.Date(shopee$date))
+
+
+
+dt<-cbind(tiki,sendo,shopee,lazada)
+
+
+
+```
+
+Ecommerce
+=======================================
+
+```{r}
+
+dygraph(dt,main="The customer interation with 4 giant ecommerce company")%>%dyOptions(fillGraph = TRUE,pointShape = "star",drawPoints = TRUE,colors = c("darkorchid","red","green","blue"),gridLineColor = "black",drawGrid = TRUE,strokeBorderColor = "white",pointSize = 5)%>%dyHighlight(highlightCircleSize = 7,highlightSeriesBackgroundAlpha = 0.6,hideOnMouseOut = TRUE)%>%dyAxis(name="x",label="Giant Ecommerce Company")%>%dyAxis(name="y",label="Th number of searching times throughout time series")%>%dyLegend(show ="follow",hideOnMouseOut = FALSE)%>%  dyShading(from = "2017-08-31", to = "2017-09-30", color = "#FFE6E6") %>%
+  dyShading(from = "2017-11-10", to = "2017-12-10", color = "#CCEBD6")%>%dySeries("tiki",label="TIKI")%>%dySeries("sendo",label="SENDO")%>%dySeries("lazada",label="LAZADA")%>%dySeries("shopee",label="SHOPEE")%>%dyRangeSelector(height=20)

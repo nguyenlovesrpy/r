@@ -1,0 +1,79 @@
+Tiki Corporation is seekiang an operationally and analytically minded professional who can drive flawless execution and insightful reporting of our marketplace programs and strategic initiatives. The ideal candidate is someone who enjoys analytics and getting the details right, and wants to learn in a fast paced, constantly changing environment. He/she will be able to understand workflow systems and business reporting tools and help implement a customer focused business strategy with a confident grasp of industry trends and while using data to solve complex problems.
+Manage strategic programs with an emphasis on flawless execution and business optimization.
+Continuously strive to automate and simplify our workflows by evaluating new systems and tools.
+Manage and improve our reporting dashboards. Work with internal data teams to evolve key performance metrics and provide actionable, new insights.
+Maintain positive collaboration with internal teams (Merchandising, Products, Finance, etc.) and external vendors (Seller, Logistics, etc.).
+Manage multiple projects – prioritizing, planning and delegating appropriate tasks.
+Analyzes sales and margin performance and interprets customer and competitor behavior to provide guidance and recommendations for strategic pricing scheme.
+Keeping track of market competitor and the state of e-commerce industry
+
+Tiki is extremely focusing on growing products to wider customer selection. This is not outside the goal of everything we have done, is to bring more happiness and convenience to our customer. 
+As a member of Supply Chain Optimization team, we have the responsibility to drive core projects to help accelerate Tiki’s effectiveness in full-filling and managing their inventory, fastening delivery speed and making right investment decision for company budget. To be honest, we have to argue that the growing of customer selection would be our new challenges - the more selection, the more challenges in managing and optimizing things.
+Fortunately, our team is constantly iterating and standing together to solve problems. We found out many solution to deal with challenges. We play with Big Data, Machine Learning, and even Deep Learning. We know the road, but we're just getting started. And at the time solutions come, the complexity of data systems also grow up…
+We are looking for Data Engineer to stand together with us and take responsibility for building a platform with strong architecture. And since we are just at the beginning of the road, you can let your imagination run free. We encourage everyone to dare to try new things and even make some mistakes, after all, it is all part of life and learning.
+Responsibilities:
+Create and maintain optimal data pipeline architecture.
+Automate manual processes, optimize data delivery, re-design infrastructure for greater scalability.
+Build the infrastructure required for optimal extraction, transformation, and loading of data from a wide variety of data sources using SQL and Google Cloud big data technologies.
+Create data tools for analytics and data scientist team members that assist them in building and optimizing our product into an innovative industry leader.
+Work closely with product owner, data analyst and data scientist to strive for greater functionality in our data systems.
+Why you will want to work here:
+We are constantly iterating! There is no such best proposal for anything, no fastest API, no best machine learning models. We design, build, test, ship, and optimize, and test. Just a stream of improvements and tests.
+We have data-driven mindset, every point of changes must be tested to gain insights into its impacts on key metrics. It's a long process, but over time, we gradually learn and become confident in our approach.
+We love "best practices". Serving important features with high throughput always give us a hitch to research and apply best practices. Any experiment or optimization is always welcomed.
+We are both independent and open. We own our products. Technical problems would be discussed internal, but for difficult one, we could request other's help
+About Retail IQ
+Retail IQ team at Tiki focuses on enabling Tiki’s 1P business to optimally answer these basic questions in order to profitably grow the business:
+What to sell?
+Where to sell?
+How much to sell?
+What price to sell at?
+What promotions to offer and when?
+Retail IQ team works on building intelligent products using data and smart technology. The team needs strong technology people who are self driven, comfortable with ambiguity and have an analytical / data driven approach to solve complex problems.
+About Engineering at Tiki
+Engineering at Tiki is all about developing well rounded technologists. Technologists who are not only hands on architects/programmers but also product builders. Engineers who also understand customer needs and business strategy first hand. Our growth will expose you to building architectures that use next gen technology. Our scale of data and customer base provide the opportunity for you to innovate using AI and learning. Problems you will solve on a day to day basis are first of its kind for a developing ecommerce market. Engineering at Tiki is a career building opportunity.
+What will you do?
+Develop clever algorithms and pragmatic solutions to our automation and optimization problems
+Build high accuracy machine learning models that can learn and optimize performance from vast amounts of data
+Develop metrics to measure the outcome/impact of your introduced solutions
+Work with other members to implement and integrate into our existing systems
+Document and improve the solutions over time
+Evaluate and identify new technologies for implementation
+Communicate with our business and technical teams to understand the analytics requirements
+Respond and follow up to incorporate feedback and draw new insights
+Prioritize tasks to meet multiple deadlines
+
+Analyze deeply into operational data to provide insights & thought leadership to business partners. Oversee overall financial activities for some parts of Business division of the company.
+Drive continuously process improvements both for Finance and Business.
+Support and research new business opportunities and proposals
+Manage cost optimization projects to scale the company’s operations
+Develop and report key performance indicators, metrics, and scorecards for performance and costs.
+Establish scalable and automated solutions based on internal requirements and business needs
+Implement effective and efficient financial control processes and coordinate with internal teams to solve problems when arise
+The Strategic Partnership Executive acts as the primary role between Tiki and our Finance business partners (banks, e-Wallet, financial partners: payment gateways, mpos, etc…), is responsible for:
+managing the relationship as an account manager
+conducting deep dive analysis and providing insights based on data
+providing timely and accurate operational support to partners on the Tiki platform
+planning, executing and monitoring the strategic plans (tactical, long-term) to achieve business targets
+collaboration with all internal stakeholders, including Marketing, Merchandise, Legal, Finance, etc.
+Roll-out and adoption of the new tools/ features as defining SOPs, training material, reporting and tracking
+Monitor and drive initiatives to improve overall seller operational performance in alignment with targets while ensuring the highest level seller experience
+Manage day-to-day seller operations, performance, order fulfillment, and develop data-driven reports to improve overall seller performance.
+Understand seller profile and seller operations to provide feedback on relevant improvement plan.
+Collaborate with existing logistic team on project initiatives, product enhancement, and daily monitoring.
+Provide analysis and regular reporting of business performance
+Reactive/ Proactive business risk management & compliance is committed to protect platform and maintaining a healthy, risk free and safe e-commerce environment on Tiki platform.
+Review risks and inadequacies in existing strategy and process and provide solutions to minimize error, fraud, and unexpected actions
+Visualization tool to support risk initiative or access/predict risk exposure
+Support the registration, claims, complaints, and disputes for intellectual property right holders
+Subject matter for seller-related risks on account registration, account-take-overs, voucher abuse, reseller abuse, fake/fraud/high-risk orders, scam sellers and returns/refunds.
+Subject matter for seller and product-related business risks on counterfeit, scam products
+Handle escalations and conduct investigations for incidents.
+Conduct analysis, reporting on performance, and identifying trends.
+Risk systems and investigate account patterns
+Customers think of Tiki as the place where they can buy everything they need to make their lives better, but shoppers aren’t Tiki’s only customers. Small businesses rely on Tiki as a trusted partner to enable them to reach millions of customers and help them grow their businesses, while also providing them with a safe and trusted place to sell their products. We have teams at Tiki responsible for finding, engaging, working with, and innovating on behalf of small businesses to help them be successful. In 2018, over 30% of our business was on Marketplace and during Single’s day, hundreds of thousands of orders were placed for our sellers.
+Our teams span a wide range of functional areas, from the seller support employees answering questions by phone and investigators keeping transaction on our platform safe, to machine learning scientists and software developers helping to drive new approaches to solving technical problems. What all of our teams have in common is a strong desire to see sellers succeed. 
+Our passion for innovating on behalf of sellers of all sizes has resulted in other industry-changing programs like Fulfillment by Tiki, which allows sellers to send us their inventory so we can fulfill orders and manage customer service on their behalf, as well as On Demand Fulfillment which lets sellers use our operational backbone to do the last mile delivery.
+Technology is at the heart of our work and we see the direct impact of what we do in the success of the sellers we work with and the expanded selection they provide to customers. Explore roles in the Marketplace team and take part in creating the future of retail for sellers and customers.
+ROLE DESCRIPTION
+The Category Business Development Manager will lead categories for marketplace teams, and will need to identify areas of selection expansion, improvement in selection efficiency, top line growth and key projects for the category he/she handles. In doing so, he/she will engage with multiple stakeholders across the organization including Category, Product, Sales & Business Development and Account Management teams. He/she will champion the requirements for his category, through the sales funnel, and drive initiatives to influence conversions, with the category teams. He will need to act as both a thought leader and influence execution through other stakeholder teams. He will be expected to represent the category in top brand/seller meetings, and internal meetings alike.

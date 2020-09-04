@@ -1,0 +1,54 @@
+Evaluate and define business metrics, democratize data by building and socializing decision tools (dashboard, reports)
+Consult business stakeholders (e.g. Business Development, Retail, Campaign, etc) to run analyses that lead to actionable Insights to growth the business
+Lead the effort to communicate state of the business to stakeholders regularly with the purpose of enabling Shopee Vietnam team understand reasons behind the trends and provide insight to drive strategic decisions
+Support various business functions with the development and maintenance of various management reports
+
+Work with Business Development to develop online merchandising and promotion plan to achieve sales targets
+Produce campaign mechanic / micro-site layout to optimize customer experience and maximize sales potential based on various factors i.e. analyzing and identifying best-selling SKUs (price points, models, colours or styles)
+Work with marketing to execute graphics and online marketing plans to drive traffic to store/campaigns week-on-week
+Plan for 360-degree marketing activities to drive brand awareness and sales performance (i.e. Super Brand Day). PMO all activities and work with multiple stakeholders to deliver a successful campaign
+Analyze past campaign performance and reporting on the current campaign’s. Maintain a comprehensive library of appropriate data: Deals Tracker, Sales Data, Traffic, Conversion Rate etc
+Analyze requirements and perform network and system solutioning, planing, installation and setup of network and system architecture
+Review new solutions and improve resilience of the current network and system environment
+Plan, deploy and monitor IT solutions to ensure system hardening and network security
+Provide network, server and system operation support, issue isolation, and troubleshooting for incidents
+Produce enterprise-level designs for Active Directory, and perform implementation, enhancement and maintenance
+Proactively maintain Linux infrastructure technology for back-end services
+Collaborate with HQ IT operation engineers to plan and execute new projects and conduct technical transfer whenever required
+Maintain detailed technical documentation for team member to review, learn and retrieve relevant information effortlessly
+Continuously work on optimizing existing services and explore new technical solutions to address current and future challenges
+Deploy source codes to Google Cloud, identifying production issues.
+Deploy and coordinate releases to Production and/or Staging environments
+Manage release cycle & processes
+Implement policies for facilitating release processes
+Track progress of released features
+Track performance of released features
+Coordinate on release issues
+Manage the versions of control system
+Experience with GKE (Google Cloud Kubernetes Engine)
+Support MySQL databases
+Perform migration for systems and databases
+Assists developers with software development and deployment procedures
+Running tests
+Perform root cause analysis for production errors
+Evaluate and clarify product requirements. Participate in reviewing product design and work with development team to incorporate test ability requirements.
+Design test plan, test cases, test procedure to ensure accuracy, stability and security of product.
+Execute test cases for all levels in test process
+Test management: responsible for reporting, tracking and verifying tasks/ bugs.
+Work with developers to analyze and find the root cause of bugs.
+Web application validation.
+Quality driven and proactive to do what is necessary to achieve deadlines in a dynamic environment with frequent priority and changes.
+Support on building and maintaining frameworks to help performance tests, automate tests and expand test coverage in and Agile development environment (plus).
+
+Apply qualitative research and quantitative analysis to understand and improve current business processes
+Perform competitor research to suggest improvements for sellers and buyer experience
+Work together with multiple stakeholders to roll out projects
+Develop KPIs for the team and subsequently review / track these KPIs
+Analyze data and generate insights to inform new initiatives
+Nurture relationships with a group of Preferred Sellers
+Create initiatives to enhance seller's performance (e.g. improve quality & push sale)
+Negotiate & promote co-operations with sellers (e.g. get the best deals for various campaigns)
+Offer packages in order to help sellers grow their business
+Track, monitor and evaluate activities of sellers
+Provide market insights from seller's' perspective, including understanding products, sellers, market & competitor dynamics
+Perform other duties as assigned by the Line Manager
